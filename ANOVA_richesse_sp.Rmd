@@ -71,20 +71,20 @@ library(tidyr)
 library(vegan)
 
 data_flo %>% 
+  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
   select(Site, Quadrat, Espece, N_ind) %>%
-  filter(!is.na(Espece)) %>%
+  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
   filter(!is.na(N_ind)) %>%
   filter(Quadrat == 1) %>% 
   filter(Site == "DM") %>% 
   #group_by(Site, Quadrat) %>%
-  pivot_wider(names_from = Espece, values_from = N_ind, values_fill = 0, values_fn = sum) %>% 
+  pivot_wider(names_from = Espece, values_from = N_ind, values_fn = sum) %>% # pivot du tableau en tableau large
   ungroup() %>%
   select(-Site, -Quadrat) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
   diversity(index = "shannon") -> # Calculer l'indice de Shannon
-  Shannon_ind   
-
-
-print(Shannon_ind)
+  Shannon_ind 
+  
+print(Shannon_ind) # indice de shannon pour DM
 
 
 
