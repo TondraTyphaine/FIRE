@@ -19,6 +19,7 @@ Dans un premier temps, la richesse spécifique S de chaque quadrat et S_tot de c
 La variable explicative est le "Site" et la variable réponse est la richesse spécifique "S".
 
 ```{r cars}
+# Packages
 install.packages("tidyverse")
 library(tidyverse)
 
@@ -50,25 +51,13 @@ Dans un second temps, pour étudier la structure de la commuauté végétale de 
 
 ```{r pressure, echo=FALSE}
 
+# Packages
 install.packages("vegan")
 install.packages("tidyr")
 install.packages("dplyr")
 library(vegan)
 library(tidyr)
 library(dplyr)
-
-data_flo %>% 
-  select(Site, Quadrat, Espece, N_ind) %>%
-  filter(!is.na(Espece)) %>% # a supprimer quand tout le monde aura rempli le excel
-  filter(!is.na(N_ind)) %>% # idem
-  group_by(Site, Quadrat) %>% 
-  diversity(data_flo$N_ind,index = "shannon") %>% 
-  print()->
-  Shannon_ind
-
-library(dplyr)
-library(tidyr)
-library(vegan)
 
 data_flo %>% 
   mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
@@ -82,13 +71,9 @@ data_flo %>%
   ungroup() %>%
   select(-Site, -Quadrat) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
   diversity(index = "shannon") -> # Calculer l'indice de Shannon
-  Shannon_ind 
+  Shannon_ind_DM_1 
   
-print(Shannon_ind) # indice de shannon pour DM
-
-
-
-
+print(Shannon_ind_DM_1) # indice de shannon pour le premier quadrat de DM
 
 
 ```
@@ -98,7 +83,16 @@ print(Shannon_ind) # indice de shannon pour DM
 Pour finaliser l'étude de la diversité des espaces vert, l'indice de l'équitabilité de Piélou est calculé afin de
 
 ```{r}
+Richesse %>% 
+  mutate(S = as.numeric(S)) %>% 
+  filter(Site == "DM") %>% 
+  filter(Quadrat == 1) %>% 
+  select(S) %>% 
+  print() ->
+  S_DM_Q1
 
+# Indice de Pielou pour le 1er quadrat de Meric
+P_DM_1 = Shannon_ind_DM_1/log2(S_DM_Q1$S)
 ```
 
 
@@ -107,6 +101,11 @@ Pour finaliser l'étude de la diversité des espaces vert, l'indice de l'équita
 ### *Indice de Jaccob*
 
 L'indice de Jaccob est utilisé pour calculer une matrice de dissimilarité entre les espaces verts étudiés afin de rendre compte des différences entre la composition de la communauté végétale de chaque espace vert.
+
+```{r}
+
+```
+
 
 # Etude du sol
 
