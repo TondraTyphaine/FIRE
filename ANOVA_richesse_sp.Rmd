@@ -94,8 +94,15 @@ data_flo %>%
   
 print(Shannon_ind_DM_2) 
 
-
-# Test de comparaison
+Shannon_ind_DM = c(Shannon_ind_DM_1,Shannon_ind_DM_2)
+  
+# Test de comparaison des indices de Shannon (a faire lorsque les ind seront calcules pour tous les sites)
+t.test(Shannon_ind_DM, Shannon_ind_BL)
+t.test(Shannon_ind_DM, Shannon_ind_MP)
+t.test(Shannon_ind_DM, Shannon_ind_RB)
+t.test(Shannon_ind_BL, Shannon_ind_MP)
+t.test(Shannon_ind_BL, Shannon_ind_RB)
+t.test(Shannon_ind_MP, Shannon_ind_RB)
 
 ```
 
@@ -129,6 +136,15 @@ Richesse %>%
 
 P_DM_2 = Shannon_ind_DM_2/log2(S_DM_Q2$S)
 
+P_DM = c(P_DM_1, P_DM_2)
+
+# Test de comparaison des indices de Pielou (a faire lorsque les ind seront calcules pour tous les sites)
+t.test(P_DM, P_BL)
+t.test(P_DM, P_MP)
+t.test(P_DM, P_RB)
+t.test(P_BL, P_MP)
+t.test(P_BL, P_RB)
+t.test(P_MP, P_RB)
 
 ```
 
