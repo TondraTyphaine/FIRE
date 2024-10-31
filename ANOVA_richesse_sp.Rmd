@@ -15,8 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### *Richesse spécifique*
 
-Dans un premier temps, la richesse spécifique S de chaque quadrat et S_tot de chaque site sont calculées (site = espace vert). Une ANOVA à un facteur permet de comparer cet indice entre les différents sites étudiés.
-La variable explicative est le "Site" et la variable réponse est la richesse spécifique "S".
+Dans un premier temps, la richesse spécifique S de chaque quadrat et S_tot de chaque site sont calculées (site = espace vert). Une ANOVA à un facteur permet de comparer cet indice entre les différents sites étudiés. La variable explicative est le "Site" et la variable réponse est la richesse spécifique "S".
 
 ```{r cars}
 # Packages
@@ -47,7 +46,7 @@ boxplot(S~Site, data = Richesse, main ="Richesse spécifique des sites étudiés
 
 ### *Indice de Shannon*
 
-Dans un second temps, pour étudier la structure de la commuauté végétale de chaque espace vert, l'indice de Shannon (H) est calculé pour chaque réplicat d'un site.
+Dans un second temps, pour étudier la structure de la commuauté végétale de chaque espace vert, l'indice de Shannon (H) est calculé pour chaque réplicat d'un site. Cet indice quantifie l'hétérogénéité de la biodiversité d'un milieu, il tend vers 0 lorsque le nombre d'espèce est faible et vers lnS lorsque le nombre d'espèce est grand.
 
 ```{r pressure, echo=FALSE}
 
@@ -71,7 +70,7 @@ data_flo %>%
   pivot_wider(names_from = Espece, values_from = N_ind, values_fn = sum) %>% # pivot du tableau en tableau large
   ungroup() %>%
   select(-Site, -Quadrat) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
-  diversity(index = "shannon") -> # Calculer l'indice de Shannon
+  diversity(index = "shannon") -> # Calcul l'indice de Shannon
   Shannon_ind_DM_1 
   
 print(Shannon_ind_DM_1) 
@@ -108,7 +107,7 @@ t.test(Shannon_ind_MP, Shannon_ind_RB)
 
 ### *Equitabilité de Piélou*
 
-Pour finaliser l'étude de la diversité des espaces vert, l'indice de l'équitabilité de Piélou est calculé afin de
+Pour finaliser l'étude de la diversité des espaces vert, l'indice de l'équitabilité de Piélou est calculé afin de mesurer l'équitabilité des abondances des espèces dans un milieu (est-ce que toutes les espèces sont présentes dans les mêmes proportions ?).
 
 ```{r}
 
@@ -148,7 +147,6 @@ t.test(P_MP, P_RB)
 
 ```
 
-
 ## Diversité bêta
 
 ### *Indice de Jaccob*
@@ -159,11 +157,10 @@ L'indice de Jaccob est utilisé pour calculer une matrice de dissimilarité entr
 
 ```
 
-
 # Etude du sol
 
 ```{r}
-data_pedo <- read.csv2("data_pedo.csv")
+data_pedo <- read_csv2("data_pedo.csv")
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
