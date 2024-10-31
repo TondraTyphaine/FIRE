@@ -1,0 +1,110 @@
+---
+title: "Data_analyse_FIRE"
+author: "Bonda Emmafie, Froult Sehlma, Thaly Janloup, Tondra Typhaine"
+date: "2024-10-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Etude de la flore
+
+## Diversité alpha
+
+### *Richesse spécifique*
+
+Dans un premier temps, la richesse spécifique S de chaque quadrat et S_tot de chaque site sont calculées (site = espace vert). Une ANOVA à un facteur permet de comparer cet indice entre les différents sites étudiés.
+La variable explicative est le "Site" et la variable réponse est la richesse spécifique "S".
+
+```{r cars}
+install.packages("tidyverse")
+library(tidyverse)
+
+data_flo <- read_csv("data_flo - Data.csv")
+
+# Calculs de la richesse spécifique
+data_flo %>% 
+  select(Site, Quadrat, Espece) %>%
+  filter(!is.na(Espece)) %>% 
+  group_by(Site, Quadrat) %>%  # Grouper d'abord par Site et Quadrat
+  summarise(S = n_distinct(Espece)) %>%  # Compter les espèces uniques dans chaque groupe
+  print() ->
+  Richesse
+
+Richesse %>% 
+  summarise(S_tot = sum(S)) %>%  # Compter les espèces uniques dans chaque groupe
+  print() ->
+  Richesse_tot
+
+# Visualisation graphique du nombre d'espèce par site
+boxplot(S~Site, data = Richesse, main ="Richesse spécifique des sites étudiés")
+
+
+```
+
+### *Indice de Shannon*
+
+Dans un second temps, pour étudier la structure de la commuauté végétale de chaque espace vert, l'indice de Shannon (H) est calculé pour chaque réplicat d'un site.
+
+```{r pressure, echo=FALSE}
+
+install.packages("vegan")
+install.packages("tidyr")
+install.packages("dplyr")
+library(vegan)
+library(tidyr)
+library(dplyr)
+
+data_flo %>% 
+  select(Site, Quadrat, Espece, N_ind) %>%
+  filter(!is.na(Espece)) %>% # a supprimer quand tout le monde aura rempli le excel
+  filter(!is.na(N_ind)) %>% # idem
+  group_by(Site, Quadrat) %>% 
+  diversity(data_flo$N_ind,index = "shannon") %>% 
+  print()->
+  Shannon_ind
+
+library(dplyr)
+library(tidyr)
+library(vegan)
+
+data_flo %>% 
+  select(Site, Quadrat, Espece, N_ind) %>%
+  filter(!is.na(Espece)) %>%  # Supprimer les lignes avec Espece manquant
+  filter(!is.na(N_ind)) %>%   # Supprimer les lignes avec N_ind manquant
+  group_by(Site, Quadrat) %>%
+  pivot_wider(names_from = Espece, values_from = N_ind) %>% 
+  ungroup() %>%
+  select(-Site, -Quadrat) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
+  diversity(index = "shannon") -> # Calculer l'indice de Shannon
+  Shannon_ind
+
+print(Shannon_ind)
+
+
+```
+
+### *Equitabilité de Piélou*
+
+Pour finaliser l'étude de la diversité des espaces vert, l'indice de l'équitabilité de Piélou est calculé afin de
+
+```{r}
+
+```
+
+
+## Diversité bêta
+
+### *Indice de Jaccob*
+
+L'indice de Jaccob est utilisé pour calculer une matrice de dissimilarité entre les espaces verts étudiés afin de rendre compte des différences entre la composition de la communauté végétale de chaque espace vert.
+
+# Etude du sol
+
+```{r}
+data_pedo <- read.csv2("data_pedo.csv")
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
