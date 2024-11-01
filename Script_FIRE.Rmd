@@ -93,9 +93,27 @@ data_flo %>%
   
 print(Shannon_ind_DM_2) 
 
-Shannon_ind_DM = c(Shannon_ind_DM_1,Shannon_ind_DM_2)
+# Indice de shannon pour le Q3 de DM
+data_flo %>% 
+  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
+  select(Site, Quadrat, Espece, N_ind) %>%
+  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
+  filter(!is.na(N_ind)) %>%
+  filter(Quadrat == 3) %>% 
+  filter(Site == "DM") %>% 
+  #group_by(Site, Quadrat) %>%
+  pivot_wider(names_from = Espece, values_from = N_ind, values_fn = sum) %>% # pivot du tableau en tableau large
+  ungroup() %>%
+  select(-Site, -Quadrat) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
+  diversity(index = "shannon") -> # Calculer l'indice de Shannon
+  Shannon_ind_DM_3 
   
-# Test de comparaison des indices de Shannon (a faire lorsque les ind seront calcules pour tous les sites)
+print(Shannon_ind_DM_3)
+
+# Compilation de tous les indices de Shannon pour DM
+Shannon_ind_DM = c(Shannon_ind_DM_1,Shannon_ind_DM_2,Shannon_ind_DM_3)
+  
+# Test de comparaison de la moyenne des indices de Shannon (a faire lorsque les ind seront calcules pour tous les sites)
 t.test(Shannon_ind_DM, Shannon_ind_BL)
 t.test(Shannon_ind_DM, Shannon_ind_MP)
 t.test(Shannon_ind_DM, Shannon_ind_RB)
@@ -135,9 +153,22 @@ Richesse %>%
 
 P_DM_2 = Shannon_ind_DM_2/log2(S_DM_Q2$S)
 
-P_DM = c(P_DM_1, P_DM_2)
+# Indice de Pielou pour le Q3 de Meric
 
-# Test de comparaison des indices de Pielou (a faire lorsque les ind seront calcules pour tous les sites)
+Richesse %>% 
+  mutate(S = as.numeric(S)) %>% 
+  filter(Site == "DM") %>% 
+  filter(Quadrat == 3) %>% 
+  select(S) %>% 
+  print() ->
+  S_DM_Q3
+
+P_DM_3 = Shannon_ind_DM_3/log2(S_DM_Q3$S)
+
+# Compilation de tous les indices de Pielou pour DM
+P_DM = c(P_DM_1, P_DM_2,P_DM_3)
+
+# Test de comparaison de la moyenne des indices de Pielou (a faire lorsque les ind seront calcules pour tous les sites)
 t.test(P_DM, P_BL)
 t.test(P_DM, P_MP)
 t.test(P_DM, P_RB)
@@ -151,10 +182,33 @@ t.test(P_MP, P_RB)
 
 ### *Indice de Jaccob*
 
-L'indice de Jaccob est utilisé pour calculer une matrice de dissimilarité entre les espaces verts étudiés afin de rendre compte des différences entre la composition de la communauté végétale de chaque espace vert.
+L'indice de Jaccob est utilisé pour calculer une matrice de dissimilarité entre les espaces verts étudiés afin de rendre compte des différences la composition des communautés végétales de chaque espace vert.
 
 ```{r}
 
+# Tableau de presence-absence des especes
+
+data_flo %>% 
+  select(Site, Espece) %>% 
+  mutate(Presence = 1) %>%                    # Ajouter une colonne "Presence" avec des 1
+  pivot_wider(names_from = Espece,            # Les noms de colonnes sont les espèces
+              values_from = Presence,         # Les valeurs proviennent de la colonne "Presence"
+              values_fill = list(Presence = 0)) %>% # Remplir les absences par 0
+  print() ->
+  pres_abs
+
+
+# Packages
+require(ade4)
+require(cluster)
+install.packages("ade4",dependencies=T)
+install.packages("cluster",dependencies=T)
+
+# Calcul de des indices de dissimilarite de Jaccard 
+jac -> vegdist(pres_abs,"jaccard") 
+
+# Matrice de Jaccard
+jac
 ```
 
 # Etude du sol
