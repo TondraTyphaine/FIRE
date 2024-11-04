@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### *Richesse spécifique*
 
-Dans un premier temps, la richesse spécifique S de chaque quadrat et S_tot de chaque site sont calculées (site = espace vert). Une ANOVA à un facteur permet de comparer cet indice entre les différents sites étudiés. La variable explicative est le "Site" et la variable réponse est la richesse spécifique "S".
+Dans un premier temps, la **richesse spécifique S de chaque quadrat et S_tot de chaque site** (site = espace vert) sont calculées pour la totalité des strates et pour chaque strate. Une ANOVA à un facteur permet de comparer cet indice entre les différents sites étudiés. La variable explicative est le "Site" et la variable réponse est la richesse spécifique "S".
 
 ```{r cars}
 # Packages
@@ -24,17 +24,19 @@ library(tidyverse)
 
 data_flo <- read_csv("data_flo - Data.csv")
 
-# Calculs de la richesse spécifique
+# Calculs de la richesse spécifique pour toutes les strates
 data_flo %>% 
-  select(Site, Quadrat, Espece) %>%
+  select(Site, Quadrat, Espece, Strate) %>%
   filter(!is.na(Espece)) %>% 
-  group_by(Site, Quadrat) %>%  # Grouper d'abord par Site et Quadrat
+  group_by(Site, Quadrat, Strate) %>%  # Grouper d'abord par Site et Quadrat
   summarise(S = n_distinct(Espece)) %>%  # Compter les espèces uniques dans chaque groupe
+  mutate(H_max = log2(S)) %>% # Calcul de H_max la valeur maximal de l'indice de Shannon
   print() ->
   Richesse
 
 Richesse %>% 
   summarise(S_tot = sum(S)) %>%  # Compter les espèces uniques dans chaque groupe
+  mutate(H_max = log2(S_tot)) %>% # Calcul de H_max la valeur maximal de l'indice de Shannon
   print() ->
   Richesse_tot
 
@@ -42,11 +44,74 @@ Richesse %>%
 boxplot(S~Site, data = Richesse, main ="Richesse spécifique des sites étudiés")
 
 
+# Calculs de la richesse spécifique pour les arbres 
+data_flo %>% 
+  select(Site, Quadrat, Espece, Strate) %>%
+  filter(!is.na(Espece)) %>% 
+  filter(Strate == "Arbre") %>% 
+  group_by(Site, Quadrat) %>%  # Grouper d'abord par Site et Quadrat
+  summarise(S = n_distinct(Espece)) %>% # Compter les espèces uniques dans chaque groupe
+  mutate(H_max = log2(S)) %>% # Calcul de H_max la valeur maximal de l'indice de Shannon
+  print() ->
+  Richesse_arbre
+
+Richesse_arbre %>% 
+  summarise(S_tot = sum(S)) %>%  # Compter les espèces uniques dans chaque groupe
+  mutate(H_max = log2(S_tot)) %>% 
+  print() ->
+  Richesse_tot_arbre
+
+# Visualisation graphique du nombre d'espèce d'arbre par site
+boxplot(S~Site, data = Richesse_arbre, main ="Richesse spécifique de la strate arborescente des sites étudiés")
+
+
+# Calculs de la richesse spécifique pour les arbustes 
+data_flo %>% 
+  select(Site, Quadrat, Espece, Strate) %>%
+  filter(!is.na(Espece)) %>% 
+  filter(Strate == "Arbuste") %>% 
+  group_by(Site, Quadrat) %>%  # Grouper d'abord par Site et Quadrat
+  summarise(S = n_distinct(Espece)) %>%  # Compter les espèces uniques dans chaque groupe
+  mutate(H_max = log2(S)) %>% 
+  print() ->
+  Richesse_arbuste
+
+Richesse_arbuste %>% 
+  summarise(S_tot = sum(S)) %>%  # Compter les espèces uniques dans chaque groupe
+  mutate(H_max = log2(S_tot)) %>% # Calcul de H_max la valeur maximal de l'indice de Shannon
+  print() ->
+  Richesse_tot_arbuste
+
+# Visualisation graphique du nombre d'espèce d'arbuste par site
+boxplot(S~Site, data = Richesse_arbuste, main ="Richesse spécifique de la strate arbustive des sites étudiés")
+
+
+# Calculs de la richesse spécifique pour les herbacees 
+data_flo %>% 
+  select(Site, Quadrat, Espece, Strate) %>%
+  filter(!is.na(Espece)) %>% 
+  filter(Strate == "Herbacée") %>% 
+  group_by(Site, Quadrat) %>%  # Grouper d'abord par Site et Quadrat
+  summarise(S = n_distinct(Espece)) %>%  # Compter les espèces uniques dans chaque groupe
+  mutate(H_max = log2(S)) %>% 
+  print() ->
+  Richesse_herbacee
+
+Richesse_herbacee %>% 
+  summarise(S_tot = sum(S)) %>%  # Compter les espèces uniques dans chaque groupe
+  mutate(H_max = log2(S_tot)) %>% # Calcul de H_max la valeur maximal de l'indice de Shannon
+  print() ->
+  Richesse_tot_herbacee
+
+# Visualisation graphique du nombre d'espèce d'arbuste par site
+boxplot(S~Site, data = Richesse_herbacee, main ="Richesse spécifique de la strate herbacée des sites étudiés")
+
+
 ```
 
 ### *Indice de Shannon*
 
-Dans un second temps, pour étudier la structure de la commuauté végétale de chaque espace vert, l'indice de Shannon (H) est calculé pour chaque réplicat d'un site. Cet indice quantifie l'hétérogénéité de la biodiversité d'un milieu, il tend vers 0 lorsque le nombre d'espèce est faible et vers lnS lorsque le nombre d'espèce est grand.
+Dans un second temps, pour étudier la structure de la commuauté végétale de chaque espace vert, **l'indice de Shannon (H)** est calculé pour **pour les arbres et arbustes de chaque quadrat d'un site.** Cet indice quantifie l'hétérogénéité de la biodiversité d'un milieu, il tend vers 0 lorsque le nombre d'espèce est faible et vers ln(S) lorsque le nombre d'espèce est grand.
 
 ```{r pressure, echo=FALSE}
 
@@ -60,16 +125,18 @@ library(dplyr)
 
 # Indice de shannon pour le Q1 de DM
 data_flo %>% 
-  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
-  select(Site, Quadrat, Espece, N_ind) %>%
-  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
-  filter(!is.na(N_ind)) %>%
+  select(Site, Quadrat, Espece, Strate, N_ind) %>%
+  filter(Strate != "Herbacée") %>% 
   filter(Quadrat == 1) %>% 
   filter(Site == "DM") %>% 
-  #group_by(Site, Quadrat) %>%
+  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
+  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
+  filter(!is.na(N_ind)) %>%
+  group_by(Site, Quadrat) %>%
   pivot_wider(names_from = Espece, values_from = N_ind, values_fn = sum) %>% # pivot du tableau en tableau large
+  replace(is.na(.), 0) %>%  # Remplace les NA par 0
   ungroup() %>%
-  select(-Site, -Quadrat) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
+  select(-Site, -Quadrat, -Strate) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
   diversity(index = "shannon") -> # Calcul l'indice de Shannon
   Shannon_ind_DM_1 
   
@@ -78,40 +145,114 @@ print(Shannon_ind_DM_1)
 
 # Indice de shannon pour le Q2 de DM
 data_flo %>% 
-  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
-  select(Site, Quadrat, Espece, N_ind) %>%
-  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
-  filter(!is.na(N_ind)) %>%
+  select(Site, Quadrat, Espece, Strate, N_ind) %>%
+  filter(Strate != "Herbacée") %>% 
   filter(Quadrat == 2) %>% 
   filter(Site == "DM") %>% 
-  #group_by(Site, Quadrat) %>%
+  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
+  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
+  filter(!is.na(N_ind)) %>%
+  group_by(Site, Quadrat) %>%
   pivot_wider(names_from = Espece, values_from = N_ind, values_fn = sum) %>% # pivot du tableau en tableau large
+  replace(is.na(.), 0) %>%  # Remplace les NA par 0
   ungroup() %>%
-  select(-Site, -Quadrat) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
-  diversity(index = "shannon") -> # Calculer l'indice de Shannon
+  select(-Site, -Quadrat, -Strate) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
+  diversity(index = "shannon") -> # Calcul l'indice de Shannon
   Shannon_ind_DM_2 
   
 print(Shannon_ind_DM_2) 
 
+
 # Indice de shannon pour le Q3 de DM
 data_flo %>% 
-  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
-  select(Site, Quadrat, Espece, N_ind) %>%
-  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
-  filter(!is.na(N_ind)) %>%
+  select(Site, Quadrat, Espece, Strate, N_ind) %>%
+  filter(Strate != "Herbacée") %>% 
   filter(Quadrat == 3) %>% 
   filter(Site == "DM") %>% 
-  #group_by(Site, Quadrat) %>%
+  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
+  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
+  filter(!is.na(N_ind)) %>%
+  group_by(Site, Quadrat) %>%
   pivot_wider(names_from = Espece, values_from = N_ind, values_fn = sum) %>% # pivot du tableau en tableau large
+  replace(is.na(.), 0) %>%  # Remplace les NA par 0
   ungroup() %>%
-  select(-Site, -Quadrat) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
-  diversity(index = "shannon") -> # Calculer l'indice de Shannon
+  select(-Site, -Quadrat, -Strate) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
+  diversity(index = "shannon") -> # Calcul l'indice de Shannon
   Shannon_ind_DM_3 
   
-print(Shannon_ind_DM_3)
+print(Shannon_ind_DM_3) 
 
 # Compilation de tous les indices de Shannon pour DM
 Shannon_ind_DM = c(Shannon_ind_DM_1,Shannon_ind_DM_2,Shannon_ind_DM_3)
+
+
+# Indice de shannon pour le Q1 de BL
+data_flo %>% 
+  select(Site, Quadrat, Espece, Strate, N_ind) %>%
+  filter(Strate != "Herbacée") %>% 
+  filter(Quadrat == 1) %>% 
+  filter(Site == "BL") #%>% 
+  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
+  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
+  filter(!is.na(N_ind)) %>%
+  group_by(Site, Quadrat) %>%
+  pivot_wider(names_from = Espece, values_from = N_ind, values_fn = sum) #%>% # pivot du tableau en tableau large
+  replace(is.na(.), 0) %>%  # Remplace les NA par 0
+  ungroup() %>%
+  select(-Site, -Quadrat, -Strate) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
+  diversity(index = "shannon") -> # Calcul l'indice de Shannon
+  Shannon_ind_BL_1 
+  
+print(Shannon_ind_BL_1) 
+
+# Indice de shannon pour le Q2 de BL
+data_flo %>% 
+  select(Site, Quadrat, Espece, Strate, N_ind) %>%
+  filter(Strate != "Herbacée") %>% 
+  filter(Quadrat == 2) %>% 
+  filter(Site == "BL") %>% 
+  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
+  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
+  filter(!is.na(N_ind)) %>%
+  group_by(Site, Quadrat) %>%
+  pivot_wider(names_from = Espece, values_from = N_ind, values_fn = sum) %>% # pivot du tableau en tableau large
+  replace(is.na(.), 0) %>%  # Remplace les NA par 0
+  ungroup() %>%
+  select(-Site, -Quadrat, -Strate) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
+  diversity(index = "shannon") -> # Calcul l'indice de Shannon
+  Shannon_ind_BL_2 
+  
+print(Shannon_ind_BL_2) 
+
+
+# Indice de shannon pour le Q3 de BL
+data_flo %>% 
+  select(Site, Quadrat, Espece, Strate, N_ind) %>%
+  filter(Strate != "Herbacée") %>% 
+  filter(Quadrat == 3) %>% 
+  filter(Site == "BL") %>% 
+  mutate(N_ind = as.numeric(N_ind)) %>% # pour s'assurer que ce sont des valeurs numeriques
+  filter(!is.na(Espece)) %>% # suppression des NA (a supp qd le tableau initial sera correctement complete)
+  filter(!is.na(N_ind)) %>%
+  group_by(Site, Quadrat) %>%
+  pivot_wider(names_from = Espece, values_from = N_ind, values_fn = sum) %>% # pivot du tableau en tableau large
+  replace(is.na(.), 0) %>%  # Remplace les NA par 0
+  ungroup() %>%
+  select(-Site, -Quadrat, -Strate) %>%  # Retirer Site et Quadrat pour ne garder que les abondances
+  diversity(index = "shannon") -> # Calcul l'indice de Shannon
+  Shannon_ind_BL_3 
+  
+print(Shannon_ind_BL_3) 
+
+# Compilation de tous les indices de Shannon pour BL
+Shannon_ind_BL = c(Shannon_ind_BL_1,Shannon_ind_BL_2,Shannon_ind_BL_3)
+
+# Tableau récapitulatif
+Richesse %>% 
+  filter(Strate != "Herbacée") %>% 
+  mutate(H = c(Shannon_ind_DM,Shannon_ind_BL)) %>% 
+  print() ->
+  Flo
   
 # Test de comparaison de la moyenne des indices de Shannon (a faire lorsque les ind seront calcules pour tous les sites)
 t.test(Shannon_ind_DM, Shannon_ind_BL)
@@ -125,7 +266,7 @@ t.test(Shannon_ind_MP, Shannon_ind_RB)
 
 ### *Equitabilité de Piélou*
 
-Pour finaliser l'étude de la diversité des espaces vert, l'indice de l'équitabilité de Piélou est calculé afin de mesurer l'équitabilité des abondances des espèces dans un milieu (est-ce que toutes les espèces sont présentes dans les mêmes proportions ?).
+Pour finaliser l'étude de la diversité des espaces verts, **l'indice d'équitabilité de Piélou** est calculé **pour les arbres et arbustes** **de chaque quadrat d'un site** afin de mesurer l'équitabilité des abondances des espèces dans un milieu (est-ce que toutes les espèces sont présentes dans les mêmes proportions ?). Cet indice tend vers 0 lorsqu'il y a dominance d'une unique espèce et tend vers 1 lorsque qu'il y a une équirépartition des espèces dans le milieu (ici l'espace vert).
 
 ```{r}
 
@@ -182,7 +323,7 @@ t.test(P_MP, P_RB)
 
 ### *Indice de Jaccob*
 
-L'indice de Jaccob est utilisé pour calculer une matrice de dissimilarité entre les espaces verts étudiés afin de rendre compte des différences la composition des communautés végétales de chaque espace vert.
+L'indice de Jaccob est utilisé pour calculer une matrice de dissimilarité entre les espaces verts étudiés afin de rendre compte des différences dans la composition des communautés végétales de chaque espace vert.
 
 ```{r}
 
