@@ -1,0 +1,114 @@
+---
+title: "Analyse_pédo_flo_gestion"
+author: "Bonda Emmafie, Froult Sehlma, Thaly Janloup, Tondra Typhaine"
+date: "2024-12-27"
+output: word_document
+---
+
+# Importation des données.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+data <- read_csv2("data/Data_flo_pedo_gestion.csv")
+data %>% 
+  mutate(Mean_horizon_nb = as.factor(Mean_horizon_nb),
+         mean_O_thickness = as.factor(mean_O_thickness),
+         mean_A_thickness = as.factor(mean_A_thickness),
+         mean_T1_thickness = as.factor(mean_T1_thickness),
+         mean_T2_thickness = as.factor(mean_T2_thickness),
+         mean_T3_thickness = as.factor(mean_T3_thickness),
+         mean_J_thickness = as.factor(mean_J_thickness),
+         Sand_pourcentage = as.factor(Sand_pourcentage),
+         Loam_pourcentage = as.factor(Loam_pourcentage), 
+         Clay_pourcentage = as.factor(Clay_pourcentage),
+         Therophyte_pourcentage = as.factor(Therophyte_pourcentage),
+         Geophyte_pourcentage = as.factor(Geophyte_pourcentage),
+         Hemicroptophyte_pourcentage = as.factor(Hemicroptophyte_pourcentage),
+         Chamephyte_pourcentage = as.factor(Chamephyte_pourcentage),
+         lianescent_pourcentage = as.factor(lianescent_pourcentage),
+         Phanerophyte_pourcentage = as.factor(Phanerophyte_pourcentage),
+         Helophyte_pourcentage = as.factor(Helophyte_pourcentage))
+
+
+```
+
+# ACP
+
+## Etude des variables du jeu de données
+
+### Epaisseur et nombre des horizons, et pourcentage de sable/limon/argile
+
+Le nombre d'horizon semble fortement et positivement corrélé à l'épaisseur de l'horizon T2. L'épaisseur de l'horizon A semble négativement corrélée au pourcentage d'argile dans le sol. Il en est de même entre l'horizon J et le pourcentage de sable. A l'inverse, l'épaisseur de l'horizon J semble être positivement corrélé au pourcentage d'argile. Enfin, le pourcentage de sable et le pourcentage de limons semblent être fortement et négativement corrélés.
+
+### Pourcentage des types biologiques
+
+Concernant le pourcentage des types biologiques, il semblerait que les pourcentagse des thérophytes et des hémicryptophytes soientt positivement et fortement corrélée. De même pour les chaméphytes et les phanérophytes. De fortes corrélations négatives sont notables entre le pourcentage de thérophytes et de chaméphytes, entre hémicryptophytes et chaméphytes/lianscents/phanérophytes.
+
+```{r}
+library(ade4)
+library(psych)
+library(FactoMineR)
+
+# Draftsman plot pour étudier les variables et leurs relations
+
+data %>% 
+  select(Mean_horizon_nb, mean_O_thickness,mean_A_thickness, mean_T1_thickness,mean_T2_thickness, mean_J_thickness,mean_T3_thickness, Sand_pourcentage, Loam_pourcentage, Clay_pourcentage)->
+  data_1
+
+data %>% 
+  select(Therophyte_pourcentage, Geophyte_pourcentage, Hemicroptophyte_pourcentage, Chamephyte_pourcentage, lianescent_pourcentage, Phanerophyte_pourcentage, Helophyte_pourcentage)->
+  data_2
+
+data %>% 
+  select(Panels, Late_mowing,Dead_wood, Cut, Plantation, Elagage, ZNIEFF, Leisure_facilities) ->
+  data_3
+
+pairs.panels(data_1, 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+             )
+
+pairs.panels(data_2, 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+             )
+
+pairs.panels(data_3, 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = F,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+             )
+  
+```
+
+## Réalisation ACP 
+
+```{r}
+acp <- PCA(data)
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
