@@ -9,7 +9,7 @@ output: word_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-data <- read_csv2("data/Data_flo_pedo_gestion.csv")
+data <- read_csv2("Data_flo_pedo_gestion.csv")
 data %>% 
   mutate(Mean_horizon_nb = as.factor(Mean_horizon_nb),
          mean_O_thickness = as.factor(mean_O_thickness),
@@ -60,8 +60,12 @@ data %>%
   data_2
 
 data %>% 
-  select(Panels, Late_mowing,Dead_wood, Cut, Plantation, Elagage, ZNIEFF, Leisure_facilities) ->
+  select(-Sample,-Panels, -Late_mowing,Dead_wood, -Cut, -Plantation, -Elagage, -ZNIEFF, -Leisure_facilities)->
   data_3
+
+data %>% 
+  select(Panels, Late_mowing,Dead_wood, Cut, Plantation, Elagage, ZNIEFF, Leisure_facilities) ->
+  data_4
 
 pairs.panels(data_1, 
              method = "pearson", # correlation method
@@ -77,13 +81,22 @@ pairs.panels(data_2,
              ellipses = FALSE # show correlation ellipses
              )
 
-pairs.panels(data_3, 
-             method = "pearson", # correlation method
-             hist.col = "#00AFBB",
-             density = F,  # show density plots
-             ellipses = FALSE # show correlation ellipses
-             )
-  
+cor_matrix <- cor(data_3, use = "complete.obs", method = "pearson")
+
+library(ggplot2)
+library(reshape2)  # Pour "melt" la matrice en format long
+
+# Convertir la matrice de corrélation en format long
+cor_melted <- melt(cor_matrix)
+
+# Créer la heatmap avec ggplot2
+ggplot(cor_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Heatmap de la matrice de corrélation")
+
 ```
 
 ## Réalisation ACP 
