@@ -2,42 +2,55 @@
 title: "Analyse_pédo_flo_gestion"
 author: "Bonda Emmafie, Froult Sehlma, Thaly Janloup, Tondra Typhaine"
 date: "2024-12-27"
-output: word_document
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+editor_options:
+  markdown:
+    wrap: sentence
 ---
 
 # Importation des données.
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, fig.show = 'hold'}
 library(tidyverse)
 data <- read_csv2("Data_flo_pedo_gestion.csv")
 data
 ```
 
-
 # Etude des variables du jeu de données
 
 ## Epaisseur et nombre des horizons, et pourcentage de sable/limon/argile
 
-Le nombre d'horizon semble fortement et positivement corrélé à l'épaisseur de l'horizon T2. L'épaisseur de l'horizon A semble négativement corrélée au pourcentage d'argile dans le sol. Il en est de même entre l'horizon J et le pourcentage de sable. A l'inverse, l'épaisseur de l'horizon J semble être positivement corrélé au pourcentage d'argile. Enfin, le pourcentage de sable et le pourcentage de limons semblent être fortement et négativement corrélés.
+Le nombre d'horizon semble fortement et positivement corrélé à l'épaisseur de l'horizon T2.
+L'épaisseur de l'horizon A semble négativement corrélée au pourcentage d'argile dans le sol.
+Il en est de même entre l'horizon J et le pourcentage de sable.
+A l'inverse, l'épaisseur de l'horizon J semble être positivement corrélé au pourcentage d'argile.
+Enfin, le pourcentage de sable et le pourcentage de limons semblent être fortement et négativement corrélés.
 
 ## Pourcentage des types biologiques
 
-Concernant le pourcentage des types biologiques, il semblerait que les pourcentagse des thérophytes et des hémicryptophytes soientt positivement et fortement corrélée. De même pour les chaméphytes et les phanérophytes. De fortes corrélations négatives sont notables entre le pourcentage de thérophytes et de chaméphytes, entre hémicryptophytes et chaméphytes/lianscents/phanérophytes.
+Concernant le pourcentage des types biologiques, il semblerait que les pourcentagse des thérophytes et des hémicryptophytes soientt positivement et fortement corrélée.
+De même pour les chaméphytes et les phanérophytes.
+De fortes corrélations négatives sont notables entre le pourcentage de thérophytes et de chaméphytes, entre hémicryptophytes et chaméphytes/lianscents/phanérophytes.
 
+## Toutes les variables
 
-## Toutes les variables 
-La fauche tardive est fortement et positivement corrélée avec le pourcentage de phanérophytes, la conservation de bois mort et la classification en zone ZNIEFF. A l'inverse, cette variables est fortement et négativement corrélée avec le pourcentage d'hémicryptophytes.
-s
-La conservation de bois mort est fortement et positivement corrélée à la classification en zone ZNIEFF, et corrélée plus modérément avec le pourcentage de phanérophytes et de chaméphytes. Cette variables est négatvivement et fortement corrélée au pourcentage d'hémicryptophytes, et dans une moindre mesure au pourcentage de thérophytes et d'argile.
+La fauche tardive est fortement et positivement corrélée avec le pourcentage de phanérophytes, la conservation de bois mort et la classification en zone ZNIEFF.
+A l'inverse, cette variables est fortement et négativement corrélée avec le pourcentage d'hémicryptophytes.
+s La conservation de bois mort est fortement et positivement corrélée à la classification en zone ZNIEFF, et corrélée plus modérément avec le pourcentage de phanérophytes et de chaméphytes.
+Cette variables est négatvivement et fortement corrélée au pourcentage d'hémicryptophytes, et dans une moindre mesure au pourcentage de thérophytes et d'argile.
 
-L'élagage est corrélée positivement et modérément à la conservation du bois mort, à la fauche tardive, à la classification en zone ZNIEFF et au pourcentage de lianescent. A l'inverse, l'élagage est modérément et négativement corrélée à l'aménagement de structure de loisir.
+L'élagage est corrélée positivement et modérément à la conservation du bois mort, à la fauche tardive, à la classification en zone ZNIEFF et au pourcentage de lianescent.
+A l'inverse, l'élagage est modérément et négativement corrélée à l'aménagement de structure de loisir.
 
 L'aménagement de structure de loisir est faiblement corrélée avec l'ensemble des autres variables.
 
 La présence de panneaux, la coupe des arbres et la plantation d'arbre ont des corrélations nulles avec les autres variables, car elles ne présentent aucunes variations (que des 1 dans la variable).
 
-
-```{r}
+```{r, fig.show = 'hold'}
 library(ade4)
 library(psych)
 
@@ -100,14 +113,12 @@ data %>%
 
 
 library(corrplot)  # Pour la visualisation de corrélations
-library(reshape2)  # Pour réorganiser les données si nécessaire
-
-#data$Mean_horizon_nb <- as.numeric(data$Mean_horizon_nb)
 
 data %>% 
   select(-Sample)->
   data_cor
 
+### Fonction pour créer matrice de corrélation
 mixed_correlation <- function(data_cor) {
   n <- ncol(data_cor)
   cor_matrix_2 <- matrix(NA, n, n)
@@ -160,53 +171,64 @@ corrplot(cor_matrix_2, method = "color", tl.col = "black",
 
 ```
 
-
-
-
 # Réalisation ACP
 
 ## Les axes
 
-Le premier axe est celui qui possède la valeur propre la plus élevé et est donc celui qui explique le plus la variabilité des observations. Le premier axe explique 37,33% de la variabilité. Le second axe explique 19,88% de la variabilité.
-
+Le premier axe est celui qui possède la valeur propre la plus élevé et est donc celui qui explique le plus la variabilité des observations.
+Le premier axe explique 37,33% de la variabilité.
+Le second axe explique 19,88% de la variabilité.
 
 ## Les variables
 
 ### Contribution
 
-Le pourcentage d'hémichryptophytes, de phanérophytes, de thérophytes, la fauche tardive, la conservation du bois mort et la classification en zone ZNIEFF contribuent le plus au premier axe. L'épaisseur moyenne de l'horizon T3, le pourcentage d'hémichryptophytes, l'aménagement de strcutures de loisir contribuent le plus au second axe. Aucune variable ne contribue majoritairement à l'axe 3. Leur contribution est assez diffuse. L'épaisseur de l'horizon A, de l'horizon T1 et le pourcentage d'argile contribuent le plus à l'axe 4. Les autres variables ont une contributions presque nulle ou plus faible.
+Le pourcentage d'hémichryptophytes, de phanérophytes, de thérophytes, la fauche tardive, la conservation du bois mort et la classification en zone ZNIEFF contribuent le plus au premier axe.
+L'épaisseur moyenne de l'horizon T3, le pourcentage d'hémichryptophytes, l'aménagement de strcutures de loisir contribuent le plus au second axe.
+Aucune variable ne contribue majoritairement à l'axe 3.
+Leur contribution est assez diffuse.
+L'épaisseur de l'horizon A, de l'horizon T1 et le pourcentage d'argile contribuent le plus à l'axe 4.
+Les autres variables ont une contributions presque nulle ou plus faible.
 
 ### Qualité de la représentation
 
-Le pourcentage d'hémichryptophytes, de phanérophytes, la fauche tardive, la conservation des arbres morts et la classification en zone ZNIEFF sont très bien représentés par l'ACP. En revanche, les variables concernant l'épaisseur des horizons et la texture du sol sont moins bien représentées. Les variables pour la présence de panneaux, de coupe et de plantation ne sont pas bien représentées du tout.
+Le pourcentage d'hémichryptophytes, de phanérophytes, la fauche tardive, la conservation des arbres morts et la classification en zone ZNIEFF sont très bien représentés par l'ACP.
+En revanche, les variables concernant l'épaisseur des horizons et la texture du sol sont moins bien représentées.
+Les variables pour la présence de panneaux, de coupe et de plantation ne sont pas bien représentées du tout.
 
 ### Corrélation avec les axes de l'ACP
 
-Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement et négativement corrélés au premier axe de l'ACP. A l'inverse, le pourcentage de lianescent, de phanérophytes, de chaméphytes, la fauche tardive, la conservation de bois mort, l'élagage et la classification en zone ZNIEFF sont fortement et positivement corrélés au premier axe de l'ACP. Le nombre moyen d'horizon et l'épaisseur moyenne de l'horizon T3 sont fortement et négativement corrélés au second axe. L'épaisseur moyenne de l'horizon O, le pourcentage d'hélophyte et l'aménagement de structure de loisir sont fortement et positivement corrélés au second axe de l'ACP. L'épaisseur de l'horizon A et le pourcentage de sable sont également positivement corrélés à l'axe 2 mais de manière plus modérée.
-
+Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement et négativement corrélés au premier axe de l'ACP.
+A l'inverse, le pourcentage de lianescent, de phanérophytes, de chaméphytes, la fauche tardive, la conservation de bois mort, l'élagage et la classification en zone ZNIEFF sont fortement et positivement corrélés au premier axe de l'ACP.
+Le nombre moyen d'horizon et l'épaisseur moyenne de l'horizon T3 sont fortement et négativement corrélés au second axe.
+L'épaisseur moyenne de l'horizon O, le pourcentage d'hélophyte et l'aménagement de structure de loisir sont fortement et positivement corrélés au second axe de l'ACP.
+L'épaisseur de l'horizon A et le pourcentage de sable sont également positivement corrélés à l'axe 2 mais de manière plus modérée.
 
 ## Les individus (observations = samples = quadrats des parcs)
+
 ### Contribution
+
 Be.1, Be.2, Be.3, La.2 et La.3 sont les points contribuant le plus à la variabilité de l'axe 1.
 Pour le second axe se sont les points DM.1,DM.2, Be.1, Ri.1 et Ri.3.
 
 ### Qualité des représentations
-Les individus DM.1, Be.1 et Be.3 sont très bien représentés dans l'ACP. En revanche, les individus Ri.1, Ri.2 et Ri.3 sont plus mal représentés.
 
+Les individus DM.1, Be.1 et Be.3 sont très bien représentés dans l'ACP.
+En revanche, les individus Ri.1, Ri.2 et Ri.3 sont plus mal représentés.
 
 ### Reroupement des individus
-De prime abord, les individus semblent se rassembler selon les sites. 
-Les individus DM.1, DM.2 et DM.3 semblent être influencés par les valeurs élevées du pourcentage de lianescent, de phanérophytes, de chaméphytes, de la fauche tardive, de la conservation de bois mort, de l'élagage et de la classification en zone ZNIEFF pour l'axe 1, et par des valeurs élevées de l'épaisseur moyenne de l'horizon O, du pourcentage d'hélophyte et de l'aménagement de structure de loisir pour l'axe 2.  
+
+De prime abord, les individus semblent se rassembler selon les sites.
+Les individus DM.1, DM.2 et DM.3 semblent être influencés par les valeurs élevées du pourcentage de lianescent, de phanérophytes, de chaméphytes, de la fauche tardive, de la conservation de bois mort, de l'élagage et de la classification en zone ZNIEFF pour l'axe 1, et par des valeurs élevées de l'épaisseur moyenne de l'horizon O, du pourcentage d'hélophyte et de l'aménagement de structure de loisir pour l'axe 2.
 
 Les individus La.1, La.2 et La.3 semblent influencés par les mêmes variables que les individus 1, 2 et 3 pour l'axe 1, et par les valeurs les plus évelées du nombre moyen d'horizon et de l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
 
-Concernant les autres individus, leur regroupement est plus diffus. Les individus Be.1 et Ri.2 sont plutôt influencés par le pourcentage d'argile, de thérophytes et d'hémichryptophytes pour l'axe 1, et par les mêmes variables que les individus DM.1, DM.2 et DM.3 pour l'axe 2.
+Concernant les autres individus, leur regroupement est plus diffus.
+Les individus Be.1 et Ri.2 sont plutôt influencés par le pourcentage d'argile, de thérophytes et d'hémichryptophytes pour l'axe 1, et par les mêmes variables que les individus DM.1, DM.2 et DM.3 pour l'axe 2.
 Les individus Be.2 et Be.3 sont influencés par les mêmes variables que les individus Be.1 et Ri.2 pour l'axe 1, et par les valeurs moyennes des variables contribuant à l'axe 2.
 Les individus Ri.2 et Ri.3 sont influencés par les valeurs moyennes des varibales contribuant à l'axe 1, et par le nombre moyen d'horizon et l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
 
-
-
-```{r}
+```{r, fig.show = 'hold'}
 # Standardiser les variables quantitatives (seulement pour les variables quantitatives)
 data_quantitative_scaled <- scale(data_3)  # Mise à l'échelle
 
@@ -257,7 +279,6 @@ contribution_variables <- acp$var$contrib
 head(contribution_variables)  # Afficher les premières lignes pour voir la structure
 
 ## Heatmap des contributions des variables
-install.packages("pheatmap")
 library(pheatmap)
 pheatmap(contribution_variables, main = "Heatmap des contributions des variables",
          cluster_rows = TRUE, cluster_cols = TRUE, color = colorRampPalette(c("white", "blue"))(50))
