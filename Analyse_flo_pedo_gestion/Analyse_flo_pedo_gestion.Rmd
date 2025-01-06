@@ -24,6 +24,10 @@ Le nombre d'horizon semble fortement et positivement corrélé à l'épaisseur d
 
 Concernant le pourcentage des types biologiques, il semblerait que les pourcentagse des thérophytes et des hémicryptophytes soientt positivement et fortement corrélée. De même pour les chaméphytes et les phanérophytes. De fortes corrélations négatives sont notables entre le pourcentage de thérophytes et de chaméphytes, entre hémicryptophytes et chaméphytes/lianscents/phanérophytes.
 
+
+## Variables de la gestion
+
+
 ```{r}
 library(ade4)
 library(psych)
@@ -117,11 +121,15 @@ data %>%
 
 ```
 
+
+
+
 # Réalisation ACP
 
 ## Les axes
 
 Le premier axe est celui qui possède la valeur propre la plus élevé et est donc celui qui explique le plus la variabilité des observations. Le premier axe explique 37,33% de la variabilité. Le second axe explique 19,88% de la variabilité.
+
 
 ## Les variables
 
@@ -139,8 +147,15 @@ Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement 
 
 
 ## Les individus (observations = samples = quadrats des parcs)
+### Contribution
 
 
+### Qualité des représentations
+Les individus 1, 4 et 6 sont très bien représentés dans l'ACP. En revanche, les individus 10, 12 et 11 sont plus mal représentés.
+
+
+### Groupement
+De prime abord, les individus semblent se rassembler selon les sites. Les individus 1,2 et 3 (Dm) semblent être plutôt influencés positivement par le pourcentage de lianescent, de phanérophytes, de chaméphytes, la fauche tardive, la conservation de bois mort, l'élagage et la classification en zone ZNIEFF pour l'axe 1, et par l'épaisseur moyenne de l'horizon O, le pourcentage d'hélophyte et l'aménagement de structure de loisir pour l'axe 2.  
 
 ```{r}
 # Standardiser les variables quantitatives (seulement pour les variables quantitatives)
@@ -194,6 +209,7 @@ pheatmap(contribution_variables, main = "Heatmap des contributions des variables
          cluster_rows = TRUE, cluster_cols = TRUE, color = colorRampPalette(c("white", "blue"))(50))
 
 ## Visualiser la qualité de la représentation des variables avec Cos2
+library(factoextra)
 cos2_var <- acp$var$cos2
 fviz_cos2(acp, choice = "var", axes = 1:2) +
   ggtitle("Qualité de la représentation des variables (Cos2)")  # Ajouter un titre via ggtitle
