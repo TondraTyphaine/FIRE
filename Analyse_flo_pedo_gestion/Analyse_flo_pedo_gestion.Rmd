@@ -13,15 +13,14 @@ data <- read_csv2("Data_flo_pedo_gestion.csv")
 data
 ```
 
-# ACP
 
-## Etude des variables du jeu de données
+# Etude des variables du jeu de données
 
-### Epaisseur et nombre des horizons, et pourcentage de sable/limon/argile
+## Epaisseur et nombre des horizons, et pourcentage de sable/limon/argile
 
 Le nombre d'horizon semble fortement et positivement corrélé à l'épaisseur de l'horizon T2. L'épaisseur de l'horizon A semble négativement corrélée au pourcentage d'argile dans le sol. Il en est de même entre l'horizon J et le pourcentage de sable. A l'inverse, l'épaisseur de l'horizon J semble être positivement corrélé au pourcentage d'argile. Enfin, le pourcentage de sable et le pourcentage de limons semblent être fortement et négativement corrélés.
 
-### Pourcentage des types biologiques
+## Pourcentage des types biologiques
 
 Concernant le pourcentage des types biologiques, il semblerait que les pourcentagse des thérophytes et des hémicryptophytes soientt positivement et fortement corrélée. De même pour les chaméphytes et les phanérophytes. De fortes corrélations négatives sont notables entre le pourcentage de thérophytes et de chaméphytes, entre hémicryptophytes et chaméphytes/lianscents/phanérophytes.
 
@@ -118,27 +117,30 @@ data %>%
 
 ```
 
-## Réalisation ACP
+# Réalisation ACP
 
-### Les axes
+## Les axes
 
 Le premier axe est celui qui possède la valeur propre la plus élevé et est donc celui qui explique le plus la variabilité des observations. Le premier axe explique 37,33% de la variabilité. Le second axe explique 19,88% de la variabilité.
 
-### Les variables
+## Les variables
 
-#### Contribution
+### Contribution
 
 Le pourcentage d'hémichryptophytes, de phanérophytes, de thérophytes, la fauche tardive, la conservation du bois mort et la classification en zone ZNIEFF contribuent le plus au premier axe. L'épaisseur moyenne de l'horizon T3, le pourcentage d'hémichryptophytes, l'aménagement de strcutures de loisir contribuent le plus au second axe. Aucune variable ne contribue majoritairement à l'axe 3. Leur contribution est assez diffuse. L'épaisseur de l'horizon A, de l'horizon T1 et le pourcentage d'argile contribuent le plus à l'axe 4. Les autres variables ont une contributions presque nulle ou plus faible.
 
-#### Qualité de la représentation
+### Qualité de la représentation
 
 Le pourcentage d'hémichryptophytes, de phanérophytes, la fauche tardive, la conservation des arbres morts et la classification en zone ZNIEFF sont très bien représentés par l'ACP. En revanche, les variables concernant l'épaisseur des horizons et la texture du sol sont moins bien représentées. Les variables pour la présence de panneaux, de coupe et de plantation ne sont pas bien représentées du tout.
 
-#### Corrélation avec les axes de l'ACP
+### Corrélation avec les axes de l'ACP
 
 Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement et négativement corrélés au premier axe de l'ACP. A l'inverse, le pourcentage de lianescent, de phanérophytes, de chaméphytes, la fauche tardive, la conservation de bois mort, l'élagage et la classification en zone ZNIEFF sont fortement et positivement corrélés au premier axe de l'ACP. Le nombre moyen d'horizon, l'épaisseur moyenne de l'horizon T3 sont fortement et négativement corrélés au second axe. L'épaisseur moyenne de l'horizon O, le pourcentage d'hélophyte et l'aménagement de structure de loisir sont fortement et positivement corrélés au second axe de l'ACP. L'épaisseur de l'horizon A et le pourcentage de sable sont également positivement corrélés à l'axe 2 mais de manière plus modérée.
 
-### Les individus (observations = samples = quadrats des parcs)
+
+## Les individus (observations = samples = quadrats des parcs)
+
+
 
 ```{r}
 # Standardiser les variables quantitatives (seulement pour les variables quantitatives)
