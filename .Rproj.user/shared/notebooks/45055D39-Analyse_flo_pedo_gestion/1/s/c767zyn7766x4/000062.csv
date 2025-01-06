@@ -1,0 +1,12 @@
+"0","# Vérifier les dimensions pour s'assurer qu'il s'agit bien de vecteurs
+if(length(data_4[, i, drop = TRUE]) == length(data_4[, j, drop = TRUE])) {
+  # Calculer la corrélation Phi entre les colonnes i et j
+  cor_matrix_phi[i, j] <- phi(data_4[, i, drop = TRUE], data_4[, j, drop = TRUE])
+  cor_matrix_phi[j, i] <- cor_matrix_phi[i, j]  # Matrice symétrique
+} else {
+  stop(""Les dimensions des colonnes ne sont pas égales."")
+}
+"
+"2","Erreur dans phi(data_4[, i, drop = TRUE], data_4[, j, drop = TRUE]) : 
+  prod(dim(t)) == 4 || length(t) == 4 n'est pas TRUE
+"
