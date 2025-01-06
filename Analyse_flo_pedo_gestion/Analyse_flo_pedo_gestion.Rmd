@@ -10,26 +10,7 @@ output: word_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 data <- read_csv2("Data_flo_pedo_gestion.csv")
-data %>% 
-  mutate(Mean_horizon_nb = as.factor(Mean_horizon_nb),
-         mean_O_thickness = as.factor(mean_O_thickness),
-         mean_A_thickness = as.factor(mean_A_thickness),
-         mean_T1_thickness = as.factor(mean_T1_thickness),
-         mean_T2_thickness = as.factor(mean_T2_thickness),
-         mean_T3_thickness = as.factor(mean_T3_thickness),
-         mean_J_thickness = as.factor(mean_J_thickness),
-         Sand_pourcentage = as.factor(Sand_pourcentage),
-         Loam_pourcentage = as.factor(Loam_pourcentage), 
-         Clay_pourcentage = as.factor(Clay_pourcentage),
-         Therophyte_pourcentage = as.factor(Therophyte_pourcentage),
-         Geophyte_pourcentage = as.factor(Geophyte_pourcentage),
-         Hemicroptophyte_pourcentage = as.factor(Hemicroptophyte_pourcentage),
-         Chamephyte_pourcentage = as.factor(Chamephyte_pourcentage),
-         lianescent_pourcentage = as.factor(lianescent_pourcentage),
-         Phanerophyte_pourcentage = as.factor(Phanerophyte_pourcentage),
-         Helophyte_pourcentage = as.factor(Helophyte_pourcentage))
-
-
+data
 ```
 
 # ACP
@@ -47,25 +28,13 @@ Concernant le pourcentage des types biologiques, il semblerait que les pourcenta
 ```{r}
 library(ade4)
 library(psych)
-library(FactoMineR)
 
-# Draftsman plot pour étudier les variables et leurs relations
+# Draftsman plot et heatmap pour étudier les variables et leurs relations
 
+## Epaisseur et nombre d'horizon
 data %>% 
   select(Mean_horizon_nb, mean_O_thickness,mean_A_thickness, mean_T1_thickness,mean_T2_thickness, mean_J_thickness,mean_T3_thickness, Sand_pourcentage, Loam_pourcentage, Clay_pourcentage)->
   data_1
-
-data %>% 
-  select(Therophyte_pourcentage, Geophyte_pourcentage, Hemicroptophyte_pourcentage, Chamephyte_pourcentage, lianescent_pourcentage, Phanerophyte_pourcentage, Helophyte_pourcentage)->
-  data_2
-
-data %>% 
-  select(-Sample,-Panels, -Late_mowing,Dead_wood, -Cut, -Plantation, -Elagage, -ZNIEFF, -Leisure_facilities)->
-  data_3
-
-data %>% 
-  select(Panels, Late_mowing,Dead_wood, Cut, Plantation, Elagage, ZNIEFF, Leisure_facilities) ->
-  data_4
 
 pairs.panels(data_1, 
              method = "pearson", # correlation method
@@ -74,12 +43,25 @@ pairs.panels(data_1,
              ellipses = FALSE # show correlation ellipses
              )
 
+
+## Pourcentages des types biologiques
+data %>% 
+  select(Therophyte_pourcentage, Geophyte_pourcentage, Hemicroptophyte_pourcentage, Chamephyte_pourcentage, lianescent_pourcentage, Phanerophyte_pourcentage, Helophyte_pourcentage)->
+  data_2
+
 pairs.panels(data_2, 
              method = "pearson", # correlation method
              hist.col = "#00AFBB",
              density = TRUE,  # show density plots
              ellipses = FALSE # show correlation ellipses
              )
+
+
+
+## Epaisseur et nombre d'horizon et pourcentages des types biologiques  
+data %>% 
+  select(-Sample,-Panels, -Late_mowing,-Dead_wood, -Cut, -Plantation, -Elagage, -ZNIEFF, -Leisure_facilities)->
+  data_3
 
 cor_matrix <- cor(data_3, use = "complete.obs", method = "pearson")
 
@@ -97,31 +79,164 @@ ggplot(cor_melted, aes(Var1, Var2, fill = value)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(title = "Heatmap de la matrice de corrélation")
 
+
+
+## Variables de gestion
+data %>% 
+  select(Panels, Late_mowing,Dead_wood, Cut, Plantation, Elagage, ZNIEFF, Leisure_facilities) ->
+  data_4
+
+# # Initialiser une matrice vide pour les résultats de corrélation
+# cor_matrix_phi <- matrix(ncol = ncol(data_4), nrow = ncol(data_4))
+# 
+# # Remplir la matrice avec les coefficients Phi pour chaque paire de variables
+# for (i in 1:(ncol(data_4) - 1)) {  # Première boucle pour les indices de colonnes
+#   for (j in (i + 1):ncol(data_4)) {  # Deuxième boucle pour les paires (i, j) où j > i
+#     # Utiliser drop = TRUE pour obtenir un vecteur
+#     cor_matrix_phi[i, j] <- phi(data_4[, i, drop = TRUE], data_4[, j, drop = TRUE])  # Calcul de la corrélation Phi
+#     cor_matrix_phi[j, i] <- cor_matrix_phi[i, j]  # Matrice symétrique : valeur à [j, i] égale à [i, j]
+#   }
+# }
+
+# 
+# library(ggplot2)
+# library(reshape2)
+# 
+# # Transformer la matrice de corrélation en format long
+# cor_matrix_long <- melt(cor_matrix_phi)
+# 
+# # Créer la heatmap avec ggplot2
+# ggplot(cor_matrix_long, aes(Var1, Var2, fill = value)) +
+#   geom_tile() +
+#   geom_text(aes(label = round(value, 2)), color = "white") +
+#   scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+#   theme_minimal() +
+#   labs(title = "Matrice de corrélation Phi entre variables binaires",
+#        x = "Variables", y = "Variables")
+
+
+
 ```
 
-## Réalisation ACP 
+## Réalisation ACP
+
+### Les axes
+
+Le premier axe est celui qui possède la valeur propre la plus élevé et est donc celui qui explique le plus la variabilité des observations. Le premier axe explique 37,33% de la variabilité. Le second axe explique 19,88% de la variabilité.
+
+### Les variables
+
+#### Contribution
+
+Le pourcentage d'hémichryptophytes, de phanérophytes, de thérophytes, la fauche tardive, la conservation du bois mort et la classification en zone ZNIEFF contribuent le plus au premier axe. L'épaisseur moyenne de l'horizon T3, le pourcentage d'hémichryptophytes, l'aménagement de strcutures de loisir contribuent le plus au second axe. Aucune variable ne contribue majoritairement à l'axe 3. Leur contribution est assez diffuse. L'épaisseur de l'horizon A, de l'horizon T1 et le pourcentage d'argile contribuent le plus à l'axe 4. Les autres variables ont une contributions presque nulle ou plus faible.
+
+#### Qualité de la représentation
+
+Le pourcentage d'hémichryptophytes, de phanérophytes, la fauche tardive, la conservation des arbres morts et la classification en zone ZNIEFF sont très bien représentés par l'ACP. En revanche, les variables concernant l'épaisseur des horizons et la texture du sol sont moins bien représentées. Les variables pour la présence de panneaux, de coupe et de plantation ne sont pas bien représentées du tout.
+
+#### Corrélation avec les axes de l'ACP
+
+Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement et négativement corrélés au premier axe de l'ACP. A l'inverse, le pourcentage de lianescent, de phanérophytes, de chaméphytes, la fauche tardive, la conservation de bois mort, l'élagage et la classification en zone ZNIEFF sont fortement et positivement corrélés au premier axe de l'ACP. Le nombre moyen d'horizon, l'épaisseur moyenne de l'horizon T3 sont fortement et négativement corrélés au second axe. L'épaisseur moyenne de l'horizon O, le pourcentage d'hélophyte et l'aménagement de structure de loisir sont fortement et positivement corrélés au second axe de l'ACP. L'épaisseur de l'horizon A et le pourcentage de sable sont également positivement corrélés à l'axe 2 mais de manière plus modérée.
+
+### Les individus (observations = samples = quadrats des parcs)
 
 ```{r}
-acp <- PCA(data)
-```
+# Standardiser les variables quantitatives (seulement pour les variables quantitatives)
+data_quantitative_scaled <- scale(data_3)  # Mise à l'échelle
+
+# Concaténer les données binaires et quantitatives standardisées
+data_scaled <- cbind(data_quantitative_scaled, data_4)
+
+# Effectuer l'ACP
+library(FactoMineR)
+acp <- PCA(data_scaled, ncp = 4, scale. = TRUE)
 
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Les axes
+## Histogramme des valeurs propres
+barplot(acp$eig[,1], main="valeurs propres", names.arg=paste("dim", 1:nrow(acp$eig)))
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Contribution des axes (composantes principales)
+contribution_axes <- acp$eig
+contribution_axes
 
-```{r cars}
-summary(cars)
-```
+## Graphique de la variance expliquée par chaque axe
+barplot(contribution_axes[, 2], names.arg = 1:nrow(contribution_axes),
+        main = "Contributions des axes (Variance expliquée)",
+        xlab = "Axe", ylab = "Variance expliquée (%)",
+        col = "lightblue")
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+
+# Les variables
+## Coordonnées variables
+acp$svd$V
+
+## Cercles des corrélations
+plot.PCA (acp, choix="var", invisible="ind.sup")
+
+## Matrice des corrélations entre les variables et les axes
+acp$var$cor 
+
+## Contribution des variables aux axes
+contribution_variables <- acp$var$contrib
+head(contribution_variables)  # Afficher les premières lignes pour voir la structure
+
+## Heatmap des contributions des variables
+install.packages("pheatmap")
+library(pheatmap)
+pheatmap(contribution_variables, main = "Heatmap des contributions des variables",
+         cluster_rows = TRUE, cluster_cols = TRUE, color = colorRampPalette(c("white", "blue"))(50))
+
+## Visualiser la qualité de la représentation des variables avec Cos2
+cos2_var <- acp$var$cos2
+fviz_cos2(acp, choice = "var", axes = 1:2) +
+  ggtitle("Qualité de la représentation des variables (Cos2)")  # Ajouter un titre via ggtitle
+
+
+
+# Les individus
+## Coordonnées
+acp$svd$U
+
+## Représentation
+plot.PCA (acp, choix="ind", invisible="ind.sup")
+
+## Contribution des individus à chaque axe
+contribution_individus <- acp$ind$contrib
+head(contribution_individus)  # Afficher les premières lignes pour voir la structure
+
+## Graphique des individus avec la contribution à l'axe 1
+plot(acp, choix = "ind", main = "Graphique des individus (ACP)")
+
+## Visualiser les individus avec la qualité de la représentation sur les axes principaux
+install.packages("factoextra")
+library(factoextra)
+fviz_pca_ind(acp, col.ind = "cos2", gradient.cols = c("white", "blue"),
+             title = "Représentation des individus (qualité)")
+
+## Qualité de la représentation des variables par les axes
+cos2_individus <- acp$ind$cos2 
+
+## Heatmap des cosinus des angles (qualité de la représentation)
+pheatmap(cos2_individus, main = "Heatmap de la qualité de la représentation des individus",
+         cluster_rows = TRUE, cluster_cols = TRUE, color = colorRampPalette(c("white", "blue"))(50))
+
+
+
+# Visualiser l'ACP avec les noms des points issus de la colonne "ID"
+fviz_pca_ind(acp, 
+             label = data$Sample,  # Utiliser la colonne "Samples" pour les labels
+             geom.ind = "point",     # Points pour les individus
+             col.ind = "blue",        # Couleur des points
+             labelsize = 3,           # Taille des labels
+             repel = F,            # Eviter les chevauchements
+             title = "Visualisation of all samples")
+
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
