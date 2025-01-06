@@ -95,14 +95,12 @@ library(reshape2)  # Pour réorganiser les données si nécessaire
 
 
 # Fonction pour calculer une matrice de corrélation mixte
- ->
-  data_cor
 
 mixed_correlation <- function(data %>% select(-Sample)) {
   n <- ncol(data %>% select(-Sample))
   cor_matrix <- matrix(NA, n, n)
-  colnames(cor_matrix) <- colnames(data %>% select(-Sample))
-  rownames(cor_matrix) <- colnames(data %>% select(-Sample))
+  colnames(cor_matrix) <- colnames(data%>% select(-Sample))
+  rownames(cor_matrix) <- colnames(data%>% select(-Sample))
   
   for (i in 1:n) {
     for (j in 1:n) {
