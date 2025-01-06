@@ -25,7 +25,16 @@ Le nombre d'horizon semble fortement et positivement corrélé à l'épaisseur d
 Concernant le pourcentage des types biologiques, il semblerait que les pourcentagse des thérophytes et des hémicryptophytes soientt positivement et fortement corrélée. De même pour les chaméphytes et les phanérophytes. De fortes corrélations négatives sont notables entre le pourcentage de thérophytes et de chaméphytes, entre hémicryptophytes et chaméphytes/lianscents/phanérophytes.
 
 
-## Variables de la gestion
+## Toutes les variables 
+La fauche tardive est fortement et positivement corrélée avec le pourcentage de phanérophytes, la conservation de bois mort et la classification en zone ZNIEFF. A l'inverse, cette variables est fortement et négativement corrélée avec le pourcentage d'hémicryptophytes.
+s
+La conservation de bois mort est fortement et positivement corrélée à la classification en zone ZNIEFF, et corrélée plus modérément avec le pourcentage de phanérophytes et de chaméphytes. Cette variables est négatvivement et fortement corrélée au pourcentage d'hémicryptophytes, et dans une moindre mesure au pourcentage de thérophytes et d'argile.
+
+L'élagage est corrélée positivement et modérément à la conservation du bois mort, à la fauche tardive, à la classification en zone ZNIEFF et au pourcentage de lianescent. A l'inverse, l'élagage est modérément et négativement corrélée à l'aménagement de structure de loisir.
+
+L'aménagement de structure de loisir est faiblement corrélée avec l'ensemble des autres variables.
+
+La présence de panneaux, la coupe des arbres et la plantation d'arbre ont des corrélations nulles avec les autres variables, car elles ne présentent aucunes variations (que des 1 dans la variable).
 
 
 ```{r}
@@ -138,7 +147,7 @@ cor_matrix_2 <- mixed_correlation(data_cor)
 
 # Visualiser la heatmap des corrélations
 corrplot(cor_matrix_2, method = "color", tl.col = "black",
-         tl.srt = 45, col = colorRampPalette(c("red", "white", "blue"))(200))
+         tl.srt = 90, col = colorRampPalette(c("red", "white", "blue"))(200))
 
 
 # Pour ajouter les valeurs des coefficients de corrélations
@@ -181,18 +190,18 @@ Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement 
 
 
 ### Qualité des représentations
-Les individus 1, 4 et 6 sont très bien représentés dans l'ACP. En revanche, les individus 10, 12 et 11 sont plus mal représentés.
+Les individus DM.1, Be.1 et Be.3 sont très bien représentés dans l'ACP. En revanche, les individus Ri.1, Ri.2 et Ri.3 sont plus mal représentés.
 
 
 ### Reroupement des individus
 De prime abord, les individus semblent se rassembler selon les sites. 
-Les individus 1,2 et 3 (Dm) semblent être influencés par les valeurs élevées du pourcentage de lianescent, de phanérophytes, de chaméphytes, de la fauche tardive, de la conservation de bois mort, de l'élagage et de la classification en zone ZNIEFF pour l'axe 1, et par des valeurs élevées de l'épaisseur moyenne de l'horizon O, du pourcentage d'hélophyte et de l'aménagement de structure de loisir pour l'axe 2.  
+Les individus DM.1, DM.2 et DM.3 semblent être influencés par les valeurs élevées du pourcentage de lianescent, de phanérophytes, de chaméphytes, de la fauche tardive, de la conservation de bois mort, de l'élagage et de la classification en zone ZNIEFF pour l'axe 1, et par des valeurs élevées de l'épaisseur moyenne de l'horizon O, du pourcentage d'hélophyte et de l'aménagement de structure de loisir pour l'axe 2.  
 
-Les individus 7, 8 et 9 (La) semblent influencés par les mêmes variables que les individus 1, 2 et 3 pour l'axe 1, et par les valeurs les plus évelées du nombre moyen d'horizon et de l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
+Les individus La.1, La.2 et La.3 semblent influencés par les mêmes variables que les individus 1, 2 et 3 pour l'axe 1, et par les valeurs les plus évelées du nombre moyen d'horizon et de l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
 
-Concernant les autres individus, leur regroupement est plus diffus. Les individus 4 (Be) et 11 (Ri) sont plutôt influencés par le pourcentage d'argile, de thérophytes et d'hémichryptophytes pour l'axe 1, et par les mêmes variables que les individus 1,2 et 3 pour l'axe 2.
-Les individus 6 et 5 (Be) sont influencés par les mêmes variables que les individus 4 et 11 pour l'axe 1, et par les valeurs moyennes des variables contribuant à l'axe 2.
-Les individus 10 et 12 sont influencés par les valeurs moyennes des varibales contribuant à l'axe 1, et par le nombre moyen d'horizon et l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
+Concernant les autres individus, leur regroupement est plus diffus. Les individus Be.1 et Ri.2 sont plutôt influencés par le pourcentage d'argile, de thérophytes et d'hémichryptophytes pour l'axe 1, et par les mêmes variables que les individus DM.1, DM.2 et DM.3 pour l'axe 2.
+Les individus Be.2 et Be.3 sont influencés par les mêmes variables que les individus Be.1 et Ri.2 pour l'axe 1, et par les valeurs moyennes des variables contribuant à l'axe 2.
+Les individus Ri.2 et Ri.3 sont influencés par les valeurs moyennes des varibales contribuant à l'axe 1, et par le nombre moyen d'horizon et l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
 
 
 
@@ -228,7 +237,6 @@ barplot(contribution_axes[, 2], names.arg = 1:nrow(contribution_axes),
         main = "Contributions des axes (Variance expliquée)",
         xlab = "Axe", ylab = "Variance expliquée (%)",
         col = "lightblue")
-
 
 
 
