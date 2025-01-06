@@ -89,34 +89,55 @@ data %>%
   select(Panels, Late_mowing,Dead_wood, Cut, Plantation, Elagage, ZNIEFF, Leisure_facilities) ->
   data_4
 
-# # Initialiser une matrice vide pour les résultats de corrélation
-# cor_matrix_phi <- matrix(ncol = ncol(data_4), nrow = ncol(data_4))
-# 
-# # Remplir la matrice avec les coefficients Phi pour chaque paire de variables
-# for (i in 1:(ncol(data_4) - 1)) {  # Première boucle pour les indices de colonnes
-#   for (j in (i + 1):ncol(data_4)) {  # Deuxième boucle pour les paires (i, j) où j > i
-#     # Utiliser drop = TRUE pour obtenir un vecteur
-#     cor_matrix_phi[i, j] <- phi(data_4[, i, drop = TRUE], data_4[, j, drop = TRUE])  # Calcul de la corrélation Phi
-#     cor_matrix_phi[j, i] <- cor_matrix_phi[i, j]  # Matrice symétrique : valeur à [j, i] égale à [i, j]
-#   }
-# }
 
-# 
-# library(ggplot2)
-# library(reshape2)
-# 
-# # Transformer la matrice de corrélation en format long
-# cor_matrix_long <- melt(cor_matrix_phi)
-# 
-# # Créer la heatmap avec ggplot2
-# ggplot(cor_matrix_long, aes(Var1, Var2, fill = value)) +
-#   geom_tile() +
-#   geom_text(aes(label = round(value, 2)), color = "white") +
-#   scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
-#   theme_minimal() +
-#   labs(title = "Matrice de corrélation Phi entre variables binaires",
-#        x = "Variables", y = "Variables")
+library(corrplot)  # Pour la visualisation de corrélations
+library(reshape2)  # Pour réorganiser les données si nécessaire
 
+
+# Fonction pour calculer une matrice de corrélation mixte
+ ->
+  data_cor
+
+mixed_correlation <- function(data %>% select(-Sample)) {
+  n <- ncol(data %>% select(-Sample))
+  cor_matrix <- matrix(NA, n, n)
+  colnames(cor_matrix) <- colnames(data %>% select(-Sample))
+  rownames(cor_matrix) <- colnames(data %>% select(-Sample))
+  
+  for (i in 1:n) {
+    for (j in 1:n) {
+      if (i == j) {
+        cor_matrix[i, j] <- 1  # Corrélation parfaite sur la diagonale
+      } else {
+        x <- data[[i]]
+        y <- data[[j]]
+        
+        if (is.numeric(x) && is.numeric(y)) {
+          # Corrélation Pearson pour deux quantitatives
+          cor_matrix[i, j] <- cor(x, y, method = "pearson")
+        } else if (all(x %in% c(0, 1)) && all(y %in% c(0, 1))) {
+          # Phi coefficient pour deux binaires
+          cor_matrix[i, j] <- cor(x, y, method = "pearson")
+        } else {
+          # Corrélation point-biserielle pour binaire et quantitative
+          cor_matrix[i, j] <- cor(as.numeric(x), as.numeric(y), method = "pearson")
+        }
+      }
+    }
+  }
+  return(cor_matrix)
+}
+
+# Calculer la matrice de corrélation mixte
+cor_matrix <- mixed_correlation(data%>% select(-Sample))
+
+# Visualiser la heatmap des corrélations
+corrplot(cor_matrix, method = "color", tl.col = "black",
+         tl.srt = 45, col = colorRampPalette(c("red", "white", "blue"))(200))
+
+
+# Pour ajouter les valeurs des coefficients de corrélations
+#addCoef.col = "black" 
 
 
 ```
@@ -173,10 +194,16 @@ data_quantitative_scaled <- scale(data_3)  # Mise à l'échelle
 # Concaténer les données binaires et quantitatives standardisées
 data_scaled <- cbind(data_quantitative_scaled, data_4)
 
+# Ajouter les noms des échantillons comme noms des lignes
+rownames(data_scaled) <- data$Sample
+
+# Supprimer la colonne "Sample" de data_scaled
+data_scaled <- data_scaled[, !colnames(data_scaled) %in% "Sample"]
+
+
 # Effectuer l'ACP
 library(FactoMineR)
 acp <- PCA(data_scaled, ncp = 4, scale. = TRUE)
-
 
 
 # Les axes
@@ -240,7 +267,7 @@ head(contribution_individus)  # Afficher les premières lignes pour voir la stru
 plot(acp, choix = "ind", main = "Graphique des individus (ACP)")
 
 ## Visualiser les individus avec la qualité de la représentation sur les axes principaux
-install.packages("factoextra")
+#install.packages("factoextra")
 library(factoextra)
 fviz_pca_ind(acp, col.ind = "cos2", gradient.cols = c("white", "blue"),
              title = "Représentation des individus (qualité)")
@@ -253,14 +280,12 @@ pheatmap(cos2_individus, main = "Heatmap de la qualité de la représentation de
          cluster_rows = TRUE, cluster_cols = TRUE, color = colorRampPalette(c("white", "blue"))(50))
 
 
-
-# Visualiser l'ACP avec les noms des points issus de la colonne "ID"
+# Visualiser l'ACP avec les noms des individus
 fviz_pca_ind(acp, 
-             label = data$Sample,  # Utiliser la colonne "Samples" pour les labels
              geom.ind = "point",     # Points pour les individus
              col.ind = "blue",        # Couleur des points
              labelsize = 3,           # Taille des labels
-             repel = F,            # Eviter les chevauchements
+             repel = FALSE,           # Eviter les chevauchements
              title = "Visualisation of all samples")
 
 
