@@ -187,7 +187,8 @@ Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement 
 
 ## Les individus (observations = samples = quadrats des parcs)
 ### Contribution
-
+Be.1, Be.2, Be.3, La.2 et La.3 sont les points contribuant le plus à la variabilité de l'axe 1.
+Pour le second axe se sont les points DM.1,DM.2, Be.1, Ri.1 et Ri.3.
 
 ### Qualité des représentations
 Les individus DM.1, Be.1 et Be.3 sont très bien représentés dans l'ACP. En revanche, les individus Ri.1, Ri.2 et Ri.3 sont plus mal représentés.
