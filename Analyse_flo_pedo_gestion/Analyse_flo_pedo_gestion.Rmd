@@ -143,7 +143,7 @@ Le pourcentage d'hémichryptophytes, de phanérophytes, la fauche tardive, la co
 
 ### Corrélation avec les axes de l'ACP
 
-Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement et négativement corrélés au premier axe de l'ACP. A l'inverse, le pourcentage de lianescent, de phanérophytes, de chaméphytes, la fauche tardive, la conservation de bois mort, l'élagage et la classification en zone ZNIEFF sont fortement et positivement corrélés au premier axe de l'ACP. Le nombre moyen d'horizon, l'épaisseur moyenne de l'horizon T3 sont fortement et négativement corrélés au second axe. L'épaisseur moyenne de l'horizon O, le pourcentage d'hélophyte et l'aménagement de structure de loisir sont fortement et positivement corrélés au second axe de l'ACP. L'épaisseur de l'horizon A et le pourcentage de sable sont également positivement corrélés à l'axe 2 mais de manière plus modérée.
+Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement et négativement corrélés au premier axe de l'ACP. A l'inverse, le pourcentage de lianescent, de phanérophytes, de chaméphytes, la fauche tardive, la conservation de bois mort, l'élagage et la classification en zone ZNIEFF sont fortement et positivement corrélés au premier axe de l'ACP. Le nombre moyen d'horizon et l'épaisseur moyenne de l'horizon T3 sont fortement et négativement corrélés au second axe. L'épaisseur moyenne de l'horizon O, le pourcentage d'hélophyte et l'aménagement de structure de loisir sont fortement et positivement corrélés au second axe de l'ACP. L'épaisseur de l'horizon A et le pourcentage de sable sont également positivement corrélés à l'axe 2 mais de manière plus modérée.
 
 
 ## Les individus (observations = samples = quadrats des parcs)
@@ -154,8 +154,17 @@ Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement 
 Les individus 1, 4 et 6 sont très bien représentés dans l'ACP. En revanche, les individus 10, 12 et 11 sont plus mal représentés.
 
 
-### Groupement
-De prime abord, les individus semblent se rassembler selon les sites. Les individus 1,2 et 3 (Dm) semblent être plutôt influencés positivement par le pourcentage de lianescent, de phanérophytes, de chaméphytes, la fauche tardive, la conservation de bois mort, l'élagage et la classification en zone ZNIEFF pour l'axe 1, et par l'épaisseur moyenne de l'horizon O, le pourcentage d'hélophyte et l'aménagement de structure de loisir pour l'axe 2.  
+### Reroupement des individus
+De prime abord, les individus semblent se rassembler selon les sites. 
+Les individus 1,2 et 3 (Dm) semblent être influencés par les valeurs élevées du pourcentage de lianescent, de phanérophytes, de chaméphytes, de la fauche tardive, de la conservation de bois mort, de l'élagage et de la classification en zone ZNIEFF pour l'axe 1, et par des valeurs élevées de l'épaisseur moyenne de l'horizon O, du pourcentage d'hélophyte et de l'aménagement de structure de loisir pour l'axe 2.  
+
+Les individus 7, 8 et 9 (La) semblent influencés par les mêmes variables que les individus 1, 2 et 3 pour l'axe 1, et par les valeurs les plus évelées du nombre moyen d'horizon et de l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
+
+Concernant les autres individus, leur regroupement est plus diffus. Les individus 4 (Be) et 11 (Ri) sont plutôt influencés par le pourcentage d'argile, de thérophytes et d'hémichryptophytes pour l'axe 1, et par les mêmes variables que les individus 1,2 et 3 pour l'axe 2.
+Les individus 6 et 5 (Be) sont influencés par les mêmes variables que les individus 4 et 11 pour l'axe 1, et par les valeurs moyennes des variables contribuant à l'axe 2.
+Les individus 10 et 12 sont influencés par les valeurs moyennes des varibales contribuant à l'axe 1, et par le nombre moyen d'horizon et l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
+
+
 
 ```{r}
 # Standardiser les variables quantitatives (seulement pour les variables quantitatives)
