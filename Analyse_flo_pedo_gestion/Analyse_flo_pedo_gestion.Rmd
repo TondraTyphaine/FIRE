@@ -93,49 +93,60 @@ data %>%
 library(corrplot)  # Pour la visualisation de corrélations
 library(reshape2)  # Pour réorganiser les données si nécessaire
 
+#data$Mean_horizon_nb <- as.numeric(data$Mean_horizon_nb)
 
-# Fonction pour calculer une matrice de corrélation mixte
+data %>% 
+  select(-Sample)->
+  data_cor
 
-mixed_correlation <- function(data %>% select(-Sample)) {
-  n <- ncol(data %>% select(-Sample))
-  cor_matrix <- matrix(NA, n, n)
-  colnames(cor_matrix) <- colnames(data%>% select(-Sample))
-  rownames(cor_matrix) <- colnames(data%>% select(-Sample))
+mixed_correlation <- function(data_cor) {
+  n <- ncol(data_cor)
+  cor_matrix_2 <- matrix(NA, n, n)
+  colnames(cor_matrix_2) <- colnames(data_cor)
+  rownames(cor_matrix_2) <- colnames(data_cor)
   
   for (i in 1:n) {
     for (j in 1:n) {
       if (i == j) {
-        cor_matrix[i, j] <- 1  # Corrélation parfaite sur la diagonale
+        cor_matrix_2[i, j] <- 1  # Corrélation parfaite sur la diagonale
       } else {
-        x <- data[[i]]
-        y <- data[[j]]
+        x <- data_cor[[i]]
+        y <- data_cor[[j]]
         
-        if (is.numeric(x) && is.numeric(y)) {
+        if (length(unique(x)) == 1 || length(unique(y)) == 1) {
+          # Si une variable est constante, assigner NA ou 0
+          cor_matrix_2[i, j] <- 0
+        } else if (is.numeric(x) && is.numeric(y)) {
           # Corrélation Pearson pour deux quantitatives
-          cor_matrix[i, j] <- cor(x, y, method = "pearson")
+          cor_matrix_2[i, j] <- cor(x, y, method = "pearson")
         } else if (all(x %in% c(0, 1)) && all(y %in% c(0, 1))) {
           # Phi coefficient pour deux binaires
-          cor_matrix[i, j] <- cor(x, y, method = "pearson")
+          cor_matrix_2[i, j] <- cor(x, y, method = "pearson")
         } else {
           # Corrélation point-biserielle pour binaire et quantitative
-          cor_matrix[i, j] <- cor(as.numeric(x), as.numeric(y), method = "pearson")
+          cor_matrix_2[i, j] <- cor(as.numeric(x), as.numeric(y), method = "pearson")
         }
       }
     }
   }
-  return(cor_matrix)
+  return(cor_matrix_2)
 }
 
+
 # Calculer la matrice de corrélation mixte
-cor_matrix <- mixed_correlation(data%>% select(-Sample))
+cor_matrix_2 <- mixed_correlation(data_cor)
 
 # Visualiser la heatmap des corrélations
-corrplot(cor_matrix, method = "color", tl.col = "black",
+corrplot(cor_matrix_2, method = "color", tl.col = "black",
          tl.srt = 45, col = colorRampPalette(c("red", "white", "blue"))(200))
 
 
 # Pour ajouter les valeurs des coefficients de corrélations
 #addCoef.col = "black" 
+
+
+
+
 
 
 ```
