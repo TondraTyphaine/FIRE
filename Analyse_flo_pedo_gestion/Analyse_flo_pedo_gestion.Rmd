@@ -24,31 +24,49 @@ data
 
 ## Epaisseur et nombre des horizons, et pourcentage de sable/limon/argile
 
-Le nombre d'horizon semble fortement et positivement corrélé à l'épaisseur de l'horizon T2.
-L'épaisseur de l'horizon A semble négativement corrélée au pourcentage d'argile dans le sol.
-Il en est de même entre l'horizon J et le pourcentage de sable.
-A l'inverse, l'épaisseur de l'horizon J semble être positivement corrélé au pourcentage d'argile.
-Enfin, le pourcentage de sable et le pourcentage de limons semblent être fortement et négativement corrélés.
+Corrélation fortement positive : nb horizon et épaisseur moyenne de T.
+Corrélation modérément positive : épaisseur de J et % d'argile
+
+Corrélation fortement négative : % de limon et % de sable.
+Corrélation modérément négative : épaisseur de A et de T.
+
 
 ## Pourcentage des types biologiques
 
-Concernant le pourcentage des types biologiques, il semblerait que les pourcentagse des thérophytes et des hémicryptophytes soientt positivement et fortement corrélée.
-De même pour les chaméphytes et les phanérophytes.
-De fortes corrélations négatives sont notables entre le pourcentage de thérophytes et de chaméphytes, entre hémicryptophytes et chaméphytes/lianscents/phanérophytes.
+Corrélation fortement positive : % thérophytes et hémicryptophytes; % chaméphytes et phanérophytes.
+
+Corrélation modérément négative : % thérophytes et chaméphytes; % hémicryptophytes et chaméphytes/lianscents/phanérophytes
+
 
 ## Toutes les variables
 
-La fauche tardive est fortement et positivement corrélée avec le pourcentage de phanérophytes, la conservation de bois mort et la classification en zone ZNIEFF.
-A l'inverse, cette variables est fortement et négativement corrélée avec le pourcentage d'hémicryptophytes.
-s La conservation de bois mort est fortement et positivement corrélée à la classification en zone ZNIEFF, et corrélée plus modérément avec le pourcentage de phanérophytes et de chaméphytes.
-Cette variables est négatvivement et fortement corrélée au pourcentage d'hémicryptophytes, et dans une moindre mesure au pourcentage de thérophytes et d'argile.
+Corrélation fortement positive : 
+- ZNIEFF et % de phanérophytes/% chaméphytes/fauche tardive/ conservation bois mort.
+- fauche tardive et % de phanérophytes/% chaméphytes/conservation bois mort/ZNIEFF.
+- Plantation et % de thérophytes
+- conservation bois mort et % chaméphytes/phanérophytes/fauche tardive
 
-L'élagage est corrélée positivement et modérément à la conservation du bois mort, à la fauche tardive, à la classification en zone ZNIEFF et au pourcentage de lianescent.
-A l'inverse, l'élagage est modérément et négativement corrélée à l'aménagement de structure de loisir.
+Corrélation modérement positive : 
+- Plantation et % hémicryptophytes/ % argiles.
+- Jardin partagé et épaisseur de A.
+- Elagage et fauche tardive/conservation bois mort/ZNIEFF.
 
-L'aménagement de structure de loisir est faiblement corrélée avec l'ensemble des autres variables.
+Corrélation fortement négative : 
+- % de chaméphytes et fauche tardive/ conservation bois mort/ZNIEFF.
+- plantation et % phanérophytes/fauche tardive/conservation bois mort/ZNIEFF/
+→ on ne plante pas là où il y a déja des arbres.
+- Présence de chemin et épaisseur de T.
+- Fauche tardive et % de thérophytes/% hémicryptophytes/plantation/ balayage des feuilles.
+- conservation bois mort et % thérophytes/% hémicryptophytes/plantation/ balayage des feuilles.
+- ZNIEFF et % thérophytes/hémicryptophytes/plantation/barrière.
 
-La présence de panneaux, la coupe des arbres et la plantation d'arbre ont des corrélations nulles avec les autres variables, car elles ne présentent aucunes variations (que des 1 dans la variable).
+
+Corrélation modérément négative : 
+- fauche tardive et % d'argile/ balayage des feuilles.
+- conservation bois mort et présence de chemin/% d'argile.
+- élagage et % hémicryptophytes
+- ZNIEFF et % d'argile/ balayage des feuilles
+
 
 ```{r, fig.show = 'hold'}
 library(ade4)
@@ -58,7 +76,7 @@ library(psych)
 
 ## Epaisseur et nombre d'horizon
 data %>% 
-  select(Mean_horizon_nb, mean_O_thickness,mean_A_thickness, mean_T1_thickness,mean_T2_thickness, mean_J_thickness,mean_T3_thickness, Sand_pourcentage, Loam_pourcentage, Clay_pourcentage)->
+  select(Mean_horizon_nb, mean_O_thickness,mean_A_thickness, mean_T_thickness,mean_J_thickness, Sand_pourcentage, Loam_pourcentage, Clay_pourcentage)->
   data_1
 
 pairs.panels(data_1, 
@@ -85,7 +103,7 @@ pairs.panels(data_2,
 
 ## Epaisseur et nombre d'horizon et pourcentages des types biologiques  
 data %>% 
-  select(-Sample,-Panels, -Late_mowing,-Dead_wood, -Cut, -Plantation, -Elagage, -ZNIEFF, -Leisure_facilities)->
+  select(-Sample,-Panels, -Late_mowing,-Dead_wood, -Cut, -Plantation, -Elagage, -ZNIEFF, -Bench, -Leaves_sweeping, -Shared_garden, -Path, -Barrier)->
   data_3
 
 cor_matrix <- cor(data_3, use = "complete.obs", method = "pearson")
@@ -108,7 +126,7 @@ ggplot(cor_melted, aes(Var1, Var2, fill = value)) +
 
 ## Variables de gestion
 data %>% 
-  select(Panels, Late_mowing,Dead_wood, Cut, Plantation, Elagage, ZNIEFF, Leisure_facilities) ->
+  select(Panels, Late_mowing,Dead_wood, Cut, Plantation, Elagage, ZNIEFF, Bench, Leaves_sweeping, Shared_garden, Path, Barrier) ->
   data_4
 
 
@@ -182,6 +200,16 @@ Le second axe explique 19,88% de la variabilité.
 ## Les variables
 
 ### Contribution
+#### Au premier axe
+Corrélation fortement positive : % de chaméphytes, fauche tardive, conservation du bois mort, classification en zone ZNIEFF.
+Corrélation modérément positive : élagage, % de lianescent.
+
+Corrélation fortement négative : % de thérophytes/hémicryptophytes, plantation.
+Corrélation modérément négative : présence de barrière, % d'argile.
+
+#### Au deuxième axe
+Corrélation fortement positive : nombre moyen d'horizon, 
+
 
 Le pourcentage d'hémichryptophytes, de phanérophytes, de thérophytes, la fauche tardive, la conservation du bois mort et la classification en zone ZNIEFF contribuent le plus au premier axe.
 L'épaisseur moyenne de l'horizon T3, le pourcentage d'hémichryptophytes, l'aménagement de strcutures de loisir contribuent le plus au second axe.
@@ -246,7 +274,6 @@ data_scaled <- data_scaled[, !colnames(data_scaled) %in% "Sample"]
 library(FactoMineR)
 acp <- PCA(data_scaled, ncp = 4, scale. = TRUE)
 
-
 # Les axes
 ## Histogramme des valeurs propres
 barplot(acp$eig[,1], main="valeurs propres", names.arg=paste("dim", 1:nrow(acp$eig)))
@@ -268,8 +295,15 @@ barplot(contribution_axes[, 2], names.arg = 1:nrow(contribution_axes),
 ## Coordonnées variables
 acp$svd$V
 
-## Cercles des corrélations
-plot.PCA (acp, choix="var", invisible="ind.sup")
+
+# Cercles des corrélations pour les variables de gestion, de pédologie et de floristique.
+
+plot.PCA (acp,choix = "varcor",select = c("Panels", "Late_mowing","Dead_wood", "Cut", "Plantation", "Elagage", "ZNIEFF", "Bench", "Leaves_sweeping", "Shared_garden", "Path", "Barrier"))
+
+plot.PCA (acp,choix = "varcor",select = c("Mean_horizon_nb", "mean_O_thickness","mean_A_thickness", "mean_T_thickness","mean_J_thickness", "Sand_pourcentage", "Loam_pourcentage", "Clay_pourcentage"))
+
+plot.PCA (acp,choix = "varcor",select = c("Therophyte_pourcentage", "Geophyte_pourcentage", "Hemicroptophyte_pourcentage", "Chamephyte_pourcentage", "lianescent_pourcentage", "Phanerophyte_pourcentage", "Helophyte_pourcentage"))
+
 
 ## Matrice des corrélations entre les variables et les axes
 acp$var$cor 
@@ -319,13 +353,7 @@ pheatmap(cos2_individus, main = "Heatmap de la qualité de la représentation de
          cluster_rows = TRUE, cluster_cols = TRUE, color = colorRampPalette(c("white", "blue"))(50))
 
 
-# Visualiser l'ACP avec les noms des individus
-fviz_pca_ind(acp, 
-             geom.ind = "point",     # Points pour les individus
-             col.ind = "blue",        # Couleur des points
-             labelsize = 3,           # Taille des labels
-             repel = FALSE,           # Eviter les chevauchements
-             title = "Visualisation of all samples")
+
 
 
 ```
