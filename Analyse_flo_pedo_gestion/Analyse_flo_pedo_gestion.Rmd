@@ -1,0 +1,361 @@
+---
+title: "Analyse_pédo_flo_gestion"
+author: "Bonda Emmafie, Froult Sehlma, Thaly Janloup, Tondra Typhaine"
+date: "2024-12-27"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+# Importation des données.
+
+```{r setup, include=FALSE, fig.show = 'hold'}
+library(tidyverse)
+data <- read_csv2("Data_flo_pedo_gestion.csv")
+data
+```
+
+# Etude des variables du jeu de données
+
+## Epaisseur et nombre des horizons, et pourcentage de sable/limon/argile
+
+Corrélation fortement positive : nb horizon et épaisseur moyenne de T.
+Corrélation modérément positive : épaisseur de J et % d'argile
+
+Corrélation fortement négative : % de limon et % de sable.
+Corrélation modérément négative : épaisseur de A et de T.
+
+
+## Pourcentage des types biologiques
+
+Corrélation fortement positive : % thérophytes et hémicryptophytes; % chaméphytes et phanérophytes.
+
+Corrélation modérément négative : % thérophytes et chaméphytes; % hémicryptophytes et chaméphytes/lianscents/phanérophytes
+
+
+## Toutes les variables
+
+Corrélation fortement positive : 
+- ZNIEFF et % de phanérophytes/% chaméphytes/fauche tardive/ conservation bois mort.
+- fauche tardive et % de phanérophytes/% chaméphytes/conservation bois mort/ZNIEFF.
+- Plantation et % de thérophytes
+- conservation bois mort et % chaméphytes/phanérophytes/fauche tardive
+
+Corrélation modérement positive : 
+- Plantation et % hémicryptophytes/ % argiles.
+- Jardin partagé et épaisseur de A.
+- Elagage et fauche tardive/conservation bois mort/ZNIEFF.
+
+Corrélation fortement négative : 
+- % de chaméphytes et fauche tardive/ conservation bois mort/ZNIEFF.
+- plantation et % phanérophytes/fauche tardive/conservation bois mort/ZNIEFF/
+→ on ne plante pas là où il y a déja des arbres.
+- Présence de chemin et épaisseur de T.
+- Fauche tardive et % de thérophytes/% hémicryptophytes/plantation/ balayage des feuilles.
+- conservation bois mort et % thérophytes/% hémicryptophytes/plantation/ balayage des feuilles.
+- ZNIEFF et % thérophytes/hémicryptophytes/plantation/barrière.
+
+
+Corrélation modérément négative : 
+- fauche tardive et % d'argile/ balayage des feuilles.
+- conservation bois mort et présence de chemin/% d'argile.
+- élagage et % hémicryptophytes
+- ZNIEFF et % d'argile/ balayage des feuilles
+
+
+```{r, fig.show = 'hold'}
+library(ade4)
+library(psych)
+
+# Draftsman plot et heatmap pour étudier les variables et leurs relations
+
+## Epaisseur et nombre d'horizon
+data %>% 
+  select(Mean_horizon_nb, mean_O_thickness,mean_A_thickness, mean_T_thickness,mean_J_thickness, Sand_pourcentage, Loam_pourcentage, Clay_pourcentage)->
+  data_1
+
+pairs.panels(data_1, 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+             )
+
+
+## Pourcentages des types biologiques
+data %>% 
+  select(Therophyte_pourcentage, Geophyte_pourcentage, Hemicroptophyte_pourcentage, Chamephyte_pourcentage, lianescent_pourcentage, Phanerophyte_pourcentage, Helophyte_pourcentage)->
+  data_2
+
+pairs.panels(data_2, 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+             )
+
+
+
+## Epaisseur et nombre d'horizon et pourcentages des types biologiques  
+data %>% 
+  select(-Sample,-Panels, -Late_mowing,-Dead_wood, -Cut, -Plantation, -Elagage, -ZNIEFF, -Bench, -Leaves_sweeping, -Shared_garden, -Path, -Barrier)->
+  data_3
+
+cor_matrix <- cor(data_3, use = "complete.obs", method = "pearson")
+
+library(ggplot2)
+library(reshape2)  # Pour "melt" la matrice en format long
+
+# Convertir la matrice de corrélation en format long
+cor_melted <- melt(cor_matrix)
+
+# Créer la heatmap avec ggplot2
+ggplot(cor_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Heatmap de la matrice de corrélation")
+
+
+
+## Variables de gestion
+data %>% 
+  select(Panels, Late_mowing,Dead_wood, Cut, Plantation, Elagage, ZNIEFF, Bench, Leaves_sweeping, Shared_garden, Path, Barrier) ->
+  data_4
+
+
+library(corrplot)  # Pour la visualisation de corrélations
+
+data %>% 
+  select(-Sample)->
+  data_cor
+
+### Fonction pour créer matrice de corrélation
+mixed_correlation <- function(data_cor) {
+  n <- ncol(data_cor)
+  cor_matrix_2 <- matrix(NA, n, n)
+  colnames(cor_matrix_2) <- colnames(data_cor)
+  rownames(cor_matrix_2) <- colnames(data_cor)
+  
+  for (i in 1:n) {
+    for (j in 1:n) {
+      if (i == j) {
+        cor_matrix_2[i, j] <- 1  # Corrélation parfaite sur la diagonale
+      } else {
+        x <- data_cor[[i]]
+        y <- data_cor[[j]]
+        
+        if (length(unique(x)) == 1 || length(unique(y)) == 1) {
+          # Si une variable est constante, assigner NA ou 0
+          cor_matrix_2[i, j] <- 0
+        } else if (is.numeric(x) && is.numeric(y)) {
+          # Corrélation Pearson pour deux quantitatives
+          cor_matrix_2[i, j] <- cor(x, y, method = "pearson")
+        } else if (all(x %in% c(0, 1)) && all(y %in% c(0, 1))) {
+          # Phi coefficient pour deux binaires
+          cor_matrix_2[i, j] <- cor(x, y, method = "pearson")
+        } else {
+          # Corrélation point-biserielle pour binaire et quantitative
+          cor_matrix_2[i, j] <- cor(as.numeric(x), as.numeric(y), method = "pearson")
+        }
+      }
+    }
+  }
+  return(cor_matrix_2)
+}
+
+
+# Calculer la matrice de corrélation mixte
+cor_matrix_2 <- mixed_correlation(data_cor)
+
+# Visualiser la heatmap des corrélations
+corrplot(cor_matrix_2, method = "color", tl.col = "black",
+         tl.srt = 90, col = colorRampPalette(c("red", "white", "blue"))(200))
+
+
+# Pour ajouter les valeurs des coefficients de corrélations
+#addCoef.col = "black" 
+
+
+
+
+
+
+```
+
+# Réalisation ACP
+
+## Les axes
+
+Le premier axe est celui qui possède la valeur propre la plus élevé et est donc celui qui explique le plus la variabilité des observations.
+Le premier axe explique 37,33% de la variabilité.
+Le second axe explique 19,88% de la variabilité.
+
+## Les variables
+
+### Contribution
+#### Au premier axe
+Corrélation fortement positive : % de chaméphytes, fauche tardive, conservation du bois mort, classification en zone ZNIEFF.
+Corrélation modérément positive : élagage, % de lianescent.
+
+Corrélation fortement négative : % de thérophytes/hémicryptophytes, plantation.
+Corrélation modérément négative : présence de barrière, % d'argile.
+
+#### Au deuxième axe
+Corrélation fortement positive : nombre moyen d'horizon, 
+
+
+Le pourcentage d'hémichryptophytes, de phanérophytes, de thérophytes, la fauche tardive, la conservation du bois mort et la classification en zone ZNIEFF contribuent le plus au premier axe.
+L'épaisseur moyenne de l'horizon T3, le pourcentage d'hémichryptophytes, l'aménagement de strcutures de loisir contribuent le plus au second axe.
+Aucune variable ne contribue majoritairement à l'axe 3.
+Leur contribution est assez diffuse.
+L'épaisseur de l'horizon A, de l'horizon T1 et le pourcentage d'argile contribuent le plus à l'axe 4.
+Les autres variables ont une contributions presque nulle ou plus faible.
+
+### Qualité de la représentation
+
+Le pourcentage d'hémichryptophytes, de phanérophytes, la fauche tardive, la conservation des arbres morts et la classification en zone ZNIEFF sont très bien représentés par l'ACP.
+En revanche, les variables concernant l'épaisseur des horizons et la texture du sol sont moins bien représentées.
+Les variables pour la présence de panneaux, de coupe et de plantation ne sont pas bien représentées du tout.
+
+### Corrélation avec les axes de l'ACP
+
+Le pourcentage d'argile, de thérophytes et d'hémichryptophytes sont fortement et négativement corrélés au premier axe de l'ACP.
+A l'inverse, le pourcentage de lianescent, de phanérophytes, de chaméphytes, la fauche tardive, la conservation de bois mort, l'élagage et la classification en zone ZNIEFF sont fortement et positivement corrélés au premier axe de l'ACP.
+Le nombre moyen d'horizon et l'épaisseur moyenne de l'horizon T3 sont fortement et négativement corrélés au second axe.
+L'épaisseur moyenne de l'horizon O, le pourcentage d'hélophyte et l'aménagement de structure de loisir sont fortement et positivement corrélés au second axe de l'ACP.
+L'épaisseur de l'horizon A et le pourcentage de sable sont également positivement corrélés à l'axe 2 mais de manière plus modérée.
+
+## Les individus (observations = samples = quadrats des parcs)
+
+### Contribution
+
+Be.1, Be.2, Be.3, La.2 et La.3 sont les points contribuant le plus à la variabilité de l'axe 1.
+Pour le second axe se sont les points DM.1,DM.2, Be.1, Ri.1 et Ri.3.
+
+### Qualité des représentations
+
+Les individus DM.1, Be.1 et Be.3 sont très bien représentés dans l'ACP.
+En revanche, les individus Ri.1, Ri.2 et Ri.3 sont plus mal représentés.
+
+### Reroupement des individus
+
+De prime abord, les individus semblent se rassembler selon les sites.
+Les individus DM.1, DM.2 et DM.3 semblent être influencés par les valeurs élevées du pourcentage de lianescent, de phanérophytes, de chaméphytes, de la fauche tardive, de la conservation de bois mort, de l'élagage et de la classification en zone ZNIEFF pour l'axe 1, et par des valeurs élevées de l'épaisseur moyenne de l'horizon O, du pourcentage d'hélophyte et de l'aménagement de structure de loisir pour l'axe 2.
+
+Les individus La.1, La.2 et La.3 semblent influencés par les mêmes variables que les individus 1, 2 et 3 pour l'axe 1, et par les valeurs les plus évelées du nombre moyen d'horizon et de l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
+
+Concernant les autres individus, leur regroupement est plus diffus.
+Les individus Be.1 et Ri.2 sont plutôt influencés par le pourcentage d'argile, de thérophytes et d'hémichryptophytes pour l'axe 1, et par les mêmes variables que les individus DM.1, DM.2 et DM.3 pour l'axe 2.
+Les individus Be.2 et Be.3 sont influencés par les mêmes variables que les individus Be.1 et Ri.2 pour l'axe 1, et par les valeurs moyennes des variables contribuant à l'axe 2.
+Les individus Ri.2 et Ri.3 sont influencés par les valeurs moyennes des varibales contribuant à l'axe 1, et par le nombre moyen d'horizon et l'épaisseur moyenne de l'horizon T3 pour l'axe 2.
+
+```{r, fig.show = 'hold'}
+# Standardiser les variables quantitatives (seulement pour les variables quantitatives)
+data_quantitative_scaled <- scale(data_3)  # Mise à l'échelle
+
+# Concaténer les données binaires et quantitatives standardisées
+data_scaled <- cbind(data_quantitative_scaled, data_4)
+
+# Ajouter les noms des échantillons comme noms des lignes
+rownames(data_scaled) <- data$Sample
+
+# Supprimer la colonne "Sample" de data_scaled
+data_scaled <- data_scaled[, !colnames(data_scaled) %in% "Sample"]
+
+
+# Effectuer l'ACP
+library(FactoMineR)
+acp <- PCA(data_scaled, ncp = 4, scale. = TRUE)
+
+# Les axes
+## Histogramme des valeurs propres
+barplot(acp$eig[,1], main="valeurs propres", names.arg=paste("dim", 1:nrow(acp$eig)))
+
+## Contribution des axes (composantes principales)
+contribution_axes <- acp$eig
+contribution_axes
+
+## Graphique de la variance expliquée par chaque axe
+barplot(contribution_axes[, 2], names.arg = 1:nrow(contribution_axes),
+        main = "Contributions des axes (Variance expliquée)",
+        xlab = "Axe", ylab = "Variance expliquée (%)",
+        col = "lightblue")
+
+
+
+
+# Les variables
+## Coordonnées variables
+acp$svd$V
+
+
+# Cercles des corrélations pour les variables de gestion, de pédologie et de floristique.
+
+plot.PCA (acp,choix = "varcor",select = c("Panels", "Late_mowing","Dead_wood", "Cut", "Plantation", "Elagage", "ZNIEFF", "Bench", "Leaves_sweeping", "Shared_garden", "Path", "Barrier"))
+
+plot.PCA (acp,choix = "varcor",select = c("Mean_horizon_nb", "mean_O_thickness","mean_A_thickness", "mean_T_thickness","mean_J_thickness", "Sand_pourcentage", "Loam_pourcentage", "Clay_pourcentage"))
+
+plot.PCA (acp,choix = "varcor",select = c("Therophyte_pourcentage", "Geophyte_pourcentage", "Hemicroptophyte_pourcentage", "Chamephyte_pourcentage", "lianescent_pourcentage", "Phanerophyte_pourcentage", "Helophyte_pourcentage"))
+
+
+## Matrice des corrélations entre les variables et les axes
+acp$var$cor 
+
+## Contribution des variables aux axes
+contribution_variables <- acp$var$contrib
+head(contribution_variables)  # Afficher les premières lignes pour voir la structure
+
+## Heatmap des contributions des variables
+library(pheatmap)
+pheatmap(contribution_variables, main = "Heatmap des contributions des variables",
+         cluster_rows = TRUE, cluster_cols = TRUE, color = colorRampPalette(c("white", "blue"))(50))
+
+## Visualiser la qualité de la représentation des variables avec Cos2
+library(factoextra)
+cos2_var <- acp$var$cos2
+fviz_cos2(acp, choice = "var", axes = 1:2) +
+  ggtitle("Qualité de la représentation des variables (Cos2)")  # Ajouter un titre via ggtitle
+
+
+
+# Les individus
+## Coordonnées
+acp$svd$U
+
+## Représentation
+plot.PCA (acp, choix="ind", invisible="ind.sup")
+
+## Contribution des individus à chaque axe
+contribution_individus <- acp$ind$contrib
+head(contribution_individus)  # Afficher les premières lignes pour voir la structure
+
+## Graphique des individus avec la contribution à l'axe 1
+plot(acp, choix = "ind", main = "Graphique des individus (ACP)")
+
+## Visualiser les individus avec la qualité de la représentation sur les axes principaux
+#install.packages("factoextra")
+library(factoextra)
+fviz_pca_ind(acp, col.ind = "cos2", gradient.cols = c("white", "blue"),
+             title = "Représentation des individus (qualité)")
+
+## Qualité de la représentation des variables par les axes
+cos2_individus <- acp$ind$cos2 
+
+## Heatmap des cosinus des angles (qualité de la représentation)
+pheatmap(cos2_individus, main = "Heatmap de la qualité de la représentation des individus",
+         cluster_rows = TRUE, cluster_cols = TRUE, color = colorRampPalette(c("white", "blue"))(50))
+
+
+
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

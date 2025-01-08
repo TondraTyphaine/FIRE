@@ -1,0 +1,406 @@
+##################################   TP 2 ACP - UE ExDIM - Université de Montpellier ########
+# Enseignants : B. Mérigot & F. Leprieur
+# mis a jour février 2022
+
+################################################
+# Exemple 1 sur les données morphometriques IRIS
+################################################
+install.packages("ade4")
+library(ade4)
+install.packages("psych")
+library(psych)
+data(iris)
+iris
+dim(iris)
+names(iris)
+summary(iris)
+attach(iris)
+
+# Draftsman plot pour étudier les variables et leurs relations
+pairs.panels(iris, 
+             method = "spearman", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+             )
+# Ci-dessus on utilise la correlation de Spearman (basée sur le rang des valeurs) car on identifie sur les nuages de points des tendances non lineaires et/ou des points avec des valeurs relativements fortes/faibles
+# Les correlations avec la valeur "Species" ne sont pas à utiliser car c'est une variable qualitative. Ce qui est interessant ici est d'etudier les valeurs des mesures morphologiques intra-inter specifiques qui donnent deja des informations sur des variations.
+
+##############
+# ACP normee
+##############
+acp1=dudi.pca(iris[,1:4], scale=T, center=T, scannf = F,nf=4) # fonction pour faire une ACP normee avec ADE4.
+# center=T pour centrer ; scale=T pour reduire les donnees
+# ACP normee (centree-reduite, par defaut dans dudi.pca) : dudi.pca(iris[,1:4], center=T, scale=T). Adaptee quand variables d'unites differentes ou de meme unite mais de gammes de valeurs differentes (le cas ici, toutes sont en cm mais longueur et largeur ne sont pas sur les memes gammes de valeurs)
+# ACP centree : dudi.pca(iris[,1:4], centered=T, scale=F). Pas adaptee ici, uniquement quand variables de meme unite et de meme gamme de valeurs 
+
+# A ce stade on peut retenir tous les axes afin que l'analyse fournisse l'ensemble des valeurs propres pour ensuite calculer a posteriori le % de variation associee de chaque axe pour ne retenir que les plus explicatifs (generalement > 10% de variation)
+?dudi.pca
+
+str(acp1) # pour visualiser 
+# Sous objets de resultats de l'ACP
+names(acp1)
+
+# Valeurs propres (VP) :
+acp1$eig
+
+# Proprietes : moyenne des VP = 1 ; VP de chaque axe = variance des coordonnées sur chaque axe (Attention: difference au niveau calcul de la variance sous R=estimateur, donc n-1))
+mean(acp1$eig)
+var(acp1$li[,1])
+var(acp1$li[,2])
+var(acp1$li[,3])
+var(acp1$li[,4])
+
+var(acp1$l1[,1]) # variance egale 1 sur les coordonnees standardisees  
+
+################################################
+## % d'inertie associe à chaque axe
+################################################
+#Calcul des % de chaque axe :
+pc<-round(acp1$eig/sum(acp1$eig)*100,2) #standardisation puis mis en % et arrondis 
+# IMPORTANT pour savoir si l'ACP est correcte → % d'explication des composantes principales
+pc
+?round
+acp1$eig/sum(acp1$eig)*100
+
+# % cumulés
+cumsum(pc) # 96% de la variance est expliquée par les 2 premières variables.
+
+# BarPlot des % d'inertie
+# Definir le min et max de l'axe des y
+ylim <- c(0, 1.2*max(pc))
+xx <- barplot(pc, xaxt = 'n', xlab = '', width = 0.85, ylim = ylim, ylab = "% d'inertie")
+## Ajout des valeurs de % en dessus des barres
+text(x = xx, y = pc, label = pc, pos = 3, cex = 0.8, col = "black")
+## Ajout des labels sur l'axe des x (ie. numero des axes factoriels)
+axis(1, at=xx, labels=c(1:length(pc)), tick=FALSE, las=1, line=-0.5, cex.axis=0.8)
+
+# 2 axes sont suffisants (tres explicatifs). On constate ici que la selection du nombre d'axes tels que ceux dont VP > 1 (ie. la moyenne) n'est pas pertinente. Il est preferable de se baser sur le % qui est plus intuitif
+
+#########################################################
+# Representation graphique des variables
+#########################################################
+
+# cercle des correlations (pour une ACP normee)
+s.corcircle(acp1$co) 
+
+# Si 3 axes avaient ete retenus, on peut selectionner les axes a representer, par ex. 1 et 3, puis 2 et 3 : 
+#  s.corcircle(acp1$co, xax=1, yax=3) 
+#  s.corcircle(acp1$co, xax=2, yax=3) 
+
+acp1$co # coordonnees des variables = correlation des variables sur les composantes factorielles
+
+# Valeurs des coefficients de correlation de Pearson : 
+cor(iris[,1:4])
+
+
+#########################################################
+# Representation graphique des individus
+#########################################################
+
+acp1$li # coordonnees des individus sur chaque composante factorielle
+
+s.label(acp1$li[,1:2], clabel=0.5) # representation sur les axes 1 et 2
+s.label(acp1$li[,c(1,3)], clabel=0.5) # representation sur les axes 1 et 3 si on avait retenu le 3eme axe
+
+# Coordonnees des individus sur l'axe 1 (axe des x) en fonction de leur valeur pour chaque variable (axe des y) : 
+score(acp1)
+# Pour l'axe 2:
+par(mfrow=c(2,2))
+plot(acp1$li[,2],iris[,1], xlab="Axe 2", ylab=colnames(iris[1]))
+plot(acp1$li[,2],iris[,2], xlab="Axe 2", ylab=colnames(iris[2]))
+plot(acp1$li[,2],iris[,3], xlab="Axe 2", ylab=colnames(iris[3]))
+plot(acp1$li[,2],iris[,4], xlab="Axe 2", ylab=colnames(iris[4]))
+
+######################################################################
+# Relation entre les coordonnees des individus et des variables :
+# Les coordonnees des lignes sont issues de combinaison lineaire des variables initiales 
+# avec comme coefficients de regression les coefficients de correlation standardises
+######################################################################
+
+# Exemple de individus 1 d'Iris Setosa, coordonnees sur la composante 1
+
+Irisn<-scale(iris[,1:4]) # On centre et on reduit les donnees initiales et on recupere les valeurs de SL, SW, PL et PW pour tous les individus
+Irisn
+
+acp1
+acp1$c1 # coordonnees des variables standardisees (coef de correlation standardises = coeff de corr divise par la racine carre de la valeur propre correponsant a l'axe etudie)
+
+# NB : Equation pour retrouver les coordonnees d'un individu k sur la composante 1 :
+# C1k = a1*SL+ a2*SW + a3*PL + a4*PW
+# Pour l'individu 1 sur la composante 1 :
+# a1=acp1$c1[1,1]=0.5210659
+# a2=acp1$c1[2,1]=-0.2693474
+# a3=acp1$c1[3,1]=0.5804131
+# a4=acp1$c1[4,1]=0.5648565
+acp1$c1
+# On a donc : 
+
+c11 <-(0.5210659*-0.89767388)+(-0.2693474*1.01560199)+(0.5804131*-1.33575163)+(0.5648565*-1.3110521482) # coordonnees de l'individu 1 sur l'axe 1
+c11
+round(c11,2)
+# -2.26 
+
+acp1$li[1,1]
+acp1$li
+round(acp1$li[1,1],2)
+# -2.26  
+# Donc c11 egale a acp1$li[1,1]
+
+# Bilan : les coordonnees des lignes sont bien issues de combinaison lineaire des variables initiales avec comme coefficients de regression les coefficients de correlation standardises
+
+##############################################################
+
+
+# Calcul de la somme des cos2 des individus : contribution relative pour evaluer la qualite de la projection des individus (ou lignes, "row") sur les axes :
+
+cont=inertia.dudi(acp1, row.inertia = TRUE)
+cont
+
+# Calcul des cos2 :
+cos2=abs(cont$row.rel)/10000
+
+# Calcul des cos2 cumulees des axes 1-2 formant le premier plan factoriel :
+c2p12=rowSums(cos2[,c(1,2)])
+barplot(cos2[,1],las=2)
+barplot(cos2[,2],las=2)
+barplot(c2p12,las=2)
+s.value(acp1$li[,1:2], c2p12, method="greylevel",csize=0.4)
+
+# Autre representation :
+install.packages("factoextra")
+require(factoextra) 
+fviz_cos2(acp1, choice = "ind", axe=1:2)
+fviz_pca_biplot(acp1, col.ind = "cos2", gradient.cols=c("red","yellow","green"),repel = TRUE) 
+ 
+######################################
+# Representations graphiques complémentaires
+######################################
+
+# Representation d'une variable explicative qualitative :
+s.class(acp1$li, iris[,5], col=c(1:length(iris[,5])))
+acp1$li
+iris[,5]
+# Ellipse est un resume graphique et non un intervalle de confiance. Elle regroupe environ 67% des valeurs si cellipse = 1.5 (valeur par default), ou 95% si cellipse = 2.5 ; ceci si le nuage est un échantillon aléatoire simple d'une loi normale bivariée : voir details https://pbil.univ-lyon1.fr/R/pdf/qr3.pdf
+
+# Sans ellipses :
+s.class(acp1$li, iris[,5], cellipse=F, col=c("purple","orange","green") )
+# Sans lignes :
+s.class(acp1$li, iris[,5], cstar=F, col=rainbow(3))
+
+
+# Representation des variables dans le cas d'une ACP centree :
+s.arrow(acp1$co)
+
+# Representation des individus
+s.label(acp1$li, clab = 0.5)
+s.label(acp1$li, label=Species)
+
+# Biplot (attention a l'interpretation)
+scatter(acp1)
+
+# On peut tester s'il y a un effet d'une (de) variables qualitatives explicatives, ici l'espece, qui comportent plusieurs modalites.
+# Pour cela on recupere les coordonnees factorielles des individus sur chaque axe a partir desquelles on realise i) un boxplot, ii) un test stat approprie selon le 
+# nombre de modalite de la variable explicative et les hypotheses distributionnelles des residus
+
+# Effet espece sur l'axe 1
+acp1$li[,1] # valeurs de la première colonne = valeur de la première composante principale (Axis1)
+acp1$li[1,]
+boxplot(acp1$li[,1]~ iris[,5])
+
+# Effet espece sur l'axe 2
+boxplot(acp1$li[,2]~ iris[,5])
+
+# Puis faire test statistique complementaire pour chaque axe (cf semestre 1) selon ii) evoque ci-dessus (test t; anova; post hoc; ou versions parametriques)
+
+# Test sur le 1er plan factoriel (ie. axes 1 et 2 simultanement) avec une Permanova à partir de la matrice de distance euclidienne
+de<-dist(acp1$li[,c(1,2)])
+de
+install.packages("vegan")
+require(vegan)
+adonis(de~ iris[,5])
+
+###################################
+# Autre package pour realiser une ACP
+###################################
+
+install.packages("FactoMineR")
+library(FactoMineR)
+?PCA
+iris
+iris[,1:4]
+pca=PCA(iris[,1:4])
+str(pca)
+names(pca)
+
+# Individus
+pca$svd$U
+acp1$l1
+
+# variables
+pca$svd$V
+acp1$c1
+
+
+# Histogramme des valeurs propres
+barplot(pca$eig[,1], main="valeurs propres", names.arg=paste("dim", 1:nrow(pca$eig)))
+
+
+#### Graphiques individuels
+plot.PCA (pca, choix="ind", invisible="ind.sup")
+plot.PCA (pca, choix="var", invisible="ind.sup")
+
+# Voir aussi pour la representation d'une variable qualitative explicative :
+# http://www.sthda.com/french/articles/38-methodes-des-composantes-principales-dans-r-guide-pratique/73-acp-analyse-en-composantes-principales-avec-r-l-essentiel/
+
+
+# Si un 3eme axe avait ete pertinent a analyser, il est possible de realiser une representation 3D :
+# https://planspace.org/2013/02/03/pca-3d-visualization-and-clustering-in-r/
+
+
+############################
+# Exemple 2 : Donnee Meaudret
+############################
+library(ade4)
+data(meaudret)
+View(meaudret)
+?meaudret
+names(meaudret)
+attach(meaudret)
+
+mil=meaudret$env
+summary(mil)
+boxplot(mil)
+
+# Draftsman plot
+pairs.panels(mil, 
+             method = "spearman", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+             )
+
+# Normer les donnees:
+d=as.data.frame(scale (mil))
+boxplot(d)
+
+# ACP normee (variables d'unites differentes)
+acp2=dudi.pca(mil,scannf = F,nf=4)
+
+pourc=round((acp2$eig/sum(acp2$eig))*100,2)
+pourc
+## 57.50 14.67 12.15  8.13  5.45 → la première CP explique 57% de la variabilité des variables
+
+cumsum(pourc) 
+#57.50  72.17  84.32  92.45  97.90
+
+s.corcircle(acp2$co)
+
+scatter(acp2)
+
+par(mfrow = c(2,2))
+s.corcircle(acp2$co)
+scatter(acp2)
+s.class(acp2$li, meaudret$design$season, xlim=c(-8,5), ylim=c(-9,4))
+s.class(acp2$li, meaudret$design$site)
+
+# Interaction site & saison
+int<-paste(meaudret$design$season,meaudret$design$site, sep="-")
+int<-as.factor(int)
+s.class(acp2$li, int)
+# faible nombre de données pour certaines modalites
+
+# Etudier les contributions relatives etc. (cf exemple 1)
+
+fviz_cos2(acp2, choice = "ind", axe=1:2)
+fviz_pca_biplot(acp2, col.ind = "cos2", gradient.cols=c("red","yellow","green"),repel = TRUE) 
+ 
+###############################################
+# Exemple 3 : donnees morphometriques poissons
+###############################################
+
+data(lascaux)
+?lascaux
+summary(lascaux$morpho)
+names(lascaux$morpho)
+dim(lascaux$morpho)
+
+# Ici, bien que l'ensemble des valeurs de mesures morpho soient exprimees dans la meme unite (cm), elles ne sont pas dans la meme gamme de valeur :
+# La longeur standart du poisson a la plus grande gamme de valeur et risque de fortement influencer l'analyse par rapport aux autres mesures.
+# Une ACP normee est donc plus appropriee dans ce contexte
+
+
+# Y a-t-il des NAs et combien ?
+na=is.na(lascaux$morpho)
+table(na)
+       
+# Pour gerer ces donnees manquantes il serait possible de :
+# i) retirer les donnees manquantes (lignes), soit 10% des donnees ici, ou 
+# ii) utiliser PCA() de FactoMineR qui remplace ("impute") les NA par la valeur moyenne de la variable (approche "grossiere"), ou 
+# iii) utiliser une ACP iterative regularisee avec la fonction imputePCA() du package missMDA, voir video pour plus de details : http://factominer.free.fr/missMDA/PCA-fr.html
+
+# i) Retirer des donnees les valeurs manquantes :
+m = na.omit(lascaux$morpho)
+dim(m)
+# Si besoin de retirer des variables ayant des points atypiques :
+m = na.omit(lascaux$morpho)[,-c(13,18,20,27)]
+dim(m)
+m.acp=dudi.pca(m, center=TRUE, scale=TRUE)
+# Projectios.corcircle(m.acp$co)ns des variables pour une ACP centree :
+
+score(m.acp)
+
+# ii) Remplace les donnees manquantes par la moyenne de la variable :
+pca<-PCA(lascaux$morpho)
+
+# iii) Approche plus fine pour remplacer les valeurs manquantes avec ACP iterative regularisee
+install.packages("missMDA")
+require(missMDA)
+nb<-estim_ncpPCA(lascaux$morpho, scale=T)
+nb
+comp<-imputePCA(lascaux$morpho, ncp=nb, scale=T)
+ipca<-PCA(comp$completeObs)
+
+
+# Pour realiser une representation des individus en affichant leur modalite sex (avec s.class), il faut retravailler le fichier de donnees initial qui comportait des NAs dans $morpho, afin que cela coincide avec $sex : 
+
+length(lascaux$sex)
+table(lascaux$sex)
+
+# i) Approche avec ACP sans des données manquantes
+# Creation d'un tableau commun avec variable sex et variables morpho
+m<-cbind(lascaux$sex, lascaux$morpho)
+dim(m)
+
+# Retraits des lignes comportants des NAs sur ce tableau commun
+dat=na.omit(m)
+dim(dat)
+
+# ACP sur les traits morpho (i.e. a partir de la 2nd colonne de dat)
+macp <-  dudi.pca(dat[,-1], center=TRUE, scale=TRUE) 
+
+# Pourcentage associe aux axes
+pourc=round((macp$eig/sum(macp$eig))*100,2)
+pourc
+cumsum(pourc) 
+
+s.corcircle(macp$co)
+cor(dat[,2:38])
+dim(m)
+min(cor(dat[,2:38]))
+summary(cor(dat[,2:38]))
+
+# Projections des individus avec l'identification des modalites sex (i.e. 1ere colonne de dat) a laquelle ils appartiennent
+s.class(macp$li, dat[,1])
+# Pas de difference des mesures morpho entre les males et femelles
+
+# ii) Approche avec ACP remplacant valeurs manquantes par moyenne de la variable : 
+s.class(pca$svd$U, lascaux$sex, xax=1, yax=2)
+
+# iii) Approche avec ACP iterative regularisee : 
+s.class(ipca$svd$U, lascaux$sex, xax=1, yax=2)
+s.label(ipca$svd$U)
+# individu 155 atypique (certainement mal estime), representation sans cet individu ( a mentionner dans les resultats) :
+s.class(ipca$svd$U[-155,], lascaux$sex[-155], xax=1, yax=2)
+
+
