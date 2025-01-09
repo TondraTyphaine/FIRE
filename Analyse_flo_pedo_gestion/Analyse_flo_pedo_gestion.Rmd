@@ -176,7 +176,8 @@ cor_matrix_2 <- mixed_correlation(data_cor)
 
 # Visualiser la heatmap des corrélations
 corrplot(cor_matrix_2, method = "color", tl.col = "black",
-         tl.srt = 90, col = colorRampPalette(c("red", "white", "blue"))(200))
+         tl.srt = 90,tl.cex = 0.6, col = colorRampPalette(c("red", "white", "blue"))(200))
+
 
 
 # Pour ajouter les valeurs des coefficients de corrélations
