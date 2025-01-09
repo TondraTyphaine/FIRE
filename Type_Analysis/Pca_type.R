@@ -21,8 +21,9 @@ pca_scores_typeflo <- scores(pca_typeflo, display = c("sites", "species"))
 pca_df_typeflo <- data.frame(
   PC1 = pca_scores_typeflo$sites[, 1],
   PC2 = pca_scores_typeflo$sites[, 2],
-  Group = substr(rownames(typeflo_numeric), 1, 2)
+  Group = sub("\\.\\d+$", "", rownames(flo_numeric))
 )
+
 main_plot <- ggplot(pca_df_typeflo, aes(x = PC1, y = PC2, color = Group)) +
   geom_point(size = 3) +
   geom_text(aes(label = rownames(pca_df_typeflo)), vjust = 1.5, hjust = 0.5) +
@@ -30,24 +31,29 @@ main_plot <- ggplot(pca_df_typeflo, aes(x = PC1, y = PC2, color = Group)) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   coord_fixed() +
   theme_minimal() +
-  labs(title = "PCA of Plant Type Data",
+  labs(title = "PCA of Plant Type Abundance",
        x = paste0("PC1 (", round(summary(pca_typeflo)$cont$importance[2, 1] * 100, 1), "%)"),
        y = paste0("PC2 (", round(summary(pca_typeflo)$cont$importance[2, 2] * 100, 1), "%)"))
+
+main_plot <- main_plot + scale_color_discrete(labels = c("Be" = "Berges_Lez", 
+                                            "DM" = "Dom_Meric", 
+                                            "La" = "Lavalette", 
+                                            "Ri" = "Rimbaud")) +
+  scale_fill_discrete(labels = c("Be" = "Berges_Lez", 
+                                 "DM" = "Dom_Meric", 
+                                 "La" = "Lavalette", 
+                                 "Ri" = "Rimbaud"))
 
 pca_result_type <- prcomp(typeflo_numeric, scale = TRUE)
 
 circle_plot <- fviz_pca_var(pca_result_type, col.var = "contrib", repel = TRUE,
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             pointsize = 2, labelsize = 2) +
-  theme_minimal() +
-  theme(legend.position = "none", 
-        axis.title = element_blank(), 
-        axis.text = element_blank(), 
-        axis.ticks = element_blank())
-
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07")) + 
+  labs(title = "Correlation Circle of Plant Type Abundance")
+  # theme(legend.position = "none", 
+  #       axis.title = element_blank(), 
+  #       axis.text = element_blank(), 
+  #       axis.ticks = element_blank())
 # save main plot in a png of size 20x20 cm
 ggsave("main_plot.png", main_plot, width = 20, height = 20, units = "cm")
 # save main plot in a png of size 20x20 cm
 ggsave("circle_plot.png", circle_plot, width = 20, height = 20, units = "cm")
-
-

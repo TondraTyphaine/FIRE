@@ -21,17 +21,36 @@ pca_df <- data.frame(
   Group = substr(rownames(flo_numeric), 1, 2)
 )
 
-ggplot(pca_df, aes(x = PC1, y = PC2, color = Group)) +
+main_flo <- ggplot(pca_df, aes(x = PC1, y = PC2, color = Group)) +
   geom_point(size = 3) +
   geom_text(aes(label = rownames(pca_df)), vjust = 1.5, hjust = 0.5) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   geom_vline(xintercept = 0, linetype = "dashed") +
   coord_equal() +
   theme_minimal() +
-  labs(title = "PCA of Flora Data",
+  labs(title = "PCA of Plant Species Presence-Absence",
        x = paste0("PC1 (", round(summary(pca_flo)$cont$importance[2, 1] * 100, 1), "%)"),
        y = paste0("PC2 (", round(summary(pca_flo)$cont$importance[2, 2] * 100, 1), "%)"))
 
-# save ggplot in a png file with max size
-ggsave("pca_flo.png", width = 20, height = 20, units = "cm")
+main_flo <- main_flo + scale_color_discrete(labels = c("Be" = "Berges_Lez", 
+                                                         "DM" = "Dom_Meric", 
+                                                         "La" = "Lavalette", 
+                                                         "Ri" = "Rimbaud")) +
+  scale_fill_discrete(labels = c("Be" = "Berges_Lez", 
+                                 "DM" = "Dom_Meric", 
+                                 "La" = "Lavalette", 
+                                 "Ri" = "Rimbaud"))
 
+# pca_result_flo <- prcomp(flo_numeric, scale = TRUE)
+# 
+# print(circle_flo)
+# circle_flo <- fviz_pca_var(pca_result_flo, col.var = "contrib", repel = TRUE,
+#                             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"))
+
+# save ggplot in a png file with max size
+ggsave("pca_flo.png", main_flo, width = 20, height = 20, units = "cm")
+# ggsave("circle_flo.png", circle_flo, width = 20, height = 20, units = "cm")
+
+
+# give me the value of the dimensions of the pca of flo
+# summary(pca_flo)$cont$importance
